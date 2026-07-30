@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { client } from "@/sanity";
+import { client } from "@/lib/sanity";
 import { motion } from "framer-motion";
 import { Mail, Send, Users, Check, AlertCircle, Eye, Zap } from "lucide-react";
 import Modal from "../components/Modal";

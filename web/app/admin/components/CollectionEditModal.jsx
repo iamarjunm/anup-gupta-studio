@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Modal from "./Modal";
-import { client } from "../../../sanity";
+import { client } from "@/lib/sanity";
 
 export default function CollectionEditModal({
   isOpen,

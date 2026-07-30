@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { client } from "@/sanity";
+import { client } from "@/lib/sanity";
 
 export default function CollectionModal({ isOpen, onClose, onSave, editingCollection = null }) {
   const [formData, setFormData] = useState({

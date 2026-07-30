@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Upload, X, Plus, Edit2 } from "lucide-react";
-import { client } from "../../../sanity";
+import { client } from "@/lib/sanity";
 
 export default function ImageGalleryComponent({
   mainImage = null,

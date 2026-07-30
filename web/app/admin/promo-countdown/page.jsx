@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { client } from "@/sanity";
+import { client } from "@/lib/sanity";
 import { motion } from "framer-motion";
 import { Clock, Edit, RefreshCw } from "lucide-react";
 

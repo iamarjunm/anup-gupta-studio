@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { client } from "../../../sanity";
+import { client } from "@/lib/sanity";
 import { Upload, X } from "lucide-react";
 
 export default function PromoCountdownModal({

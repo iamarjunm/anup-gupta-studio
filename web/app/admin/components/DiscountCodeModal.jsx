@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { client } from "@/sanity";
+import { client } from "@/lib/sanity";
 
 export default function DiscountCodeModal({ isOpen, onClose, onSave, editingCode = null }) {
   const [formData, setFormData] = useState({

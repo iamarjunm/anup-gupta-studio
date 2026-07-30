@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { client } from "../../../sanity";
+import { client } from "@/lib/sanity";
 
 export default function ColorSearchComponent({
   selectedColor,
