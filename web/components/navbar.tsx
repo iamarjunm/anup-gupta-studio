@@ -201,7 +201,7 @@ export function Navbar() {
                 )}
               </div>
             </div>
-            <button onClick={() => setIsCartOpen(true)} className="text-gray-900 hover:text-gray-500 transition-colors relative p-1 -mr-1 cursor-pointer">
+            <button suppressHydrationWarning onClick={() => setIsCartOpen(true)} className="text-gray-900 hover:text-gray-500 transition-colors relative p-1 -mr-1 cursor-pointer">
               <ShoppingBag className="w-[18px] h-[18px]" strokeWidth={2} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-black text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">

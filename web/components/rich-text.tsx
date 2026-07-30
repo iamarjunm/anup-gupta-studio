@@ -1,19 +1,19 @@
 import { PortableText, PortableTextComponents } from '@portabletext/react';
 
-const components: PortableTextComponents = {
+const components: any = {
   block: {
-    normal: ({ children }) => <p className="text-gray-700 text-[13px] leading-relaxed mb-3">{children}</p>,
-    h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 mt-6">{children}</h1>,
-    h2: ({ children }) => <h2 className="text-xl font-bold mb-3 mt-5">{children}</h2>,
-    h3: ({ children }) => <h3 className="text-lg font-bold mb-2 mt-4">{children}</h3>,
+    normal: ({ children }: any) => <p className="text-gray-700 text-[13px] leading-relaxed mb-3">{children}</p>,
+    h1: ({ children }: any) => <h1 className="text-2xl font-bold mb-4 mt-6">{children}</h1>,
+    h2: ({ children }: any) => <h2 className="text-xl font-bold mb-3 mt-5">{children}</h2>,
+    h3: ({ children }: any) => <h3 className="text-lg font-bold mb-2 mt-4">{children}</h3>,
   },
   list: {
-    bullet: ({ children }) => <ul className="list-disc pl-5 mb-4 text-gray-700 text-[13px] space-y-1">{children}</ul>,
-    number: ({ children }) => <ol className="list-decimal pl-5 mb-4 text-gray-700 text-[13px] space-y-1">{children}</ol>,
+    bullet: ({ children }: any) => <ul className="list-disc pl-5 mb-4 text-gray-700 text-[13px] space-y-1">{children}</ul>,
+    number: ({ children }: any) => <ol className="list-decimal pl-5 mb-4 text-gray-700 text-[13px] space-y-1">{children}</ol>,
   },
   marks: {
-    strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
-    em: ({ children }) => <em className="italic">{children}</em>,
+    strong: ({ children }: any) => <strong className="font-semibold text-gray-900">{children}</strong>,
+    em: ({ children }: any) => <em className="italic">{children}</em>,
   },
 };
 
