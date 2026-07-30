@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { syncUserToSanity } from '../actions/auth';
+import { syncUserWithSanity } from '../actions/auth';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -30,8 +30,8 @@ export default function SignupPage() {
       });
 
       // 3. Sync to Sanity securely via Server Action
-      const syncResult = await syncUserToSanity({
-        firebaseUid: userCredential.user.uid,
+      const syncResult = await syncUserWithSanity({
+        uid: userCredential.user.uid,
         email: userCredential.user.email,
         name: name,
       });
