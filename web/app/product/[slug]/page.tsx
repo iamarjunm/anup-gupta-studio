@@ -22,8 +22,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   let product = fetchedProduct;
   
-  if (!product && process.env.NODE_ENV === 'development') {
-    // Provide a mock product for design testing locally if Sanity is empty
+  if (slug === 'test' || (!product && process.env.NODE_ENV === 'development')) {
+    // Provide a mock product for design testing if Sanity is empty or slug is test
     product = {
       title: 'Sample Product Design',
       price: 5999,
