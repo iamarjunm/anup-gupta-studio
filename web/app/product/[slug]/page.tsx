@@ -14,12 +14,31 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   
   // Fetch data in parallel
-  const [product, settings] = await Promise.all([
+  const [fetchedProduct, settings] = await Promise.all([
     client.fetch(PRODUCT_BY_SLUG_QUERY, { slug }),
     client.fetch(GLOBAL_SETTINGS_QUERY)
   ]);
 
-  if (!product) {
+  let product = fetchedProduct;
+  
+  if (!product && process.env.NODE_ENV === 'development') {
+    // Provide a mock product for design testing locally if Sanity is empty
+    product = {
+      title: 'Sample Product Design',
+      price: 5999,
+      compareAtPrice: 7999,
+      slug: slug,
+      images: [
+        'https://picsum.photos/seed/1/800/1200',
+        'https://picsum.photos/seed/2/800/1200',
+        'https://picsum.photos/seed/3/800/1200'
+      ],
+      description: [{ _type: 'block', children: [{ _type: 'span', text: 'This is a beautiful sample product to help you preview the layout and design of the product details page.' }] }],
+      fabric: [{ _type: 'block', children: [{ _type: 'span', text: '100% Premium Cotton' }] }],
+      lookAfterMe: [{ _type: 'block', children: [{ _type: 'span', text: 'Machine wash cold. Do not bleach.' }] }],
+      availableSizes: ['S', 'M', 'L', 'XL']
+    };
+  } else if (!product) {
     notFound();
   }
 
