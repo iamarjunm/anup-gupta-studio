@@ -35,66 +35,89 @@ export function ProductForm({ product, children }: ProductFormProps) {
     <>
       {/* Size Selector */}
       <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Size</h3>
+        <h3 className="text-[13px] text-gray-600 mb-3 tracking-wide">Size</h3>
         <div className="flex flex-wrap gap-2 mb-3">
           {(product.availableSizes || ['Custom']).map((size: string) => (
             <button 
               key={size}
+              suppressHydrationWarning
               onClick={() => setSelectedSize(size)}
-              className={`w-12 h-10 border flex items-center justify-center text-sm transition-colors cursor-pointer
+              className={`h-9 min-w-[36px] px-3 border flex items-center justify-center text-[11px] tracking-widest transition-colors cursor-pointer
                 ${selectedSize === size ? 'bg-black text-white border-black' : 'bg-white text-gray-900 border-gray-200 hover:border-black'}`}
             >
               {size}
             </button>
           ))}
+          <button 
+            suppressHydrationWarning
+            onClick={() => setSelectedSize('Custom Tailored')}
+            className={`h-9 px-4 border flex items-center justify-center text-[11px] tracking-widest transition-colors cursor-pointer
+              ${selectedSize === 'Custom Tailored' ? 'bg-black text-white border-black' : 'bg-[#fcfcfc] text-gray-600 border-gray-200 hover:border-black'}`}
+          >
+            CUSTOM TAILORED
+          </button>
         </div>
-        <button 
-          onClick={() => setSelectedSize('Custom Tailored')}
-          className={`border text-sm px-4 py-2 transition-colors cursor-pointer
-            ${selectedSize === 'Custom Tailored' ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-900 hover:border-black'}`}
-        >
-          Custom Tailored
-        </button>
+      </div>
+
+      {/* Style Selector */}
+      <div className="mb-6">
+        <h3 className="text-[13px] text-gray-600 mb-3 tracking-wide">Style</h3>
+        <div className="flex gap-2">
+          <button suppressHydrationWarning className="h-9 px-5 bg-black text-white text-[11px] tracking-widest cursor-pointer">
+            Only Kurta
+          </button>
+          <button suppressHydrationWarning className="h-9 px-5 border border-gray-200 text-gray-600 hover:text-black hover:border-black text-[11px] tracking-widest transition-colors cursor-pointer">
+            Kurta set with Pant
+          </button>
+        </div>
       </div>
 
       {children}
 
       {/* Notes */}
-      <p className="text-sm text-gray-600 mb-8">
+      <p className="text-xs text-gray-600 mb-6 leading-relaxed">
         * For custom tailored size, Please provide your size details in the Order Notes in the cart
       </p>
 
       {/* Add to Cart Area */}
-      <div className="flex flex-col gap-4 mb-12">
-        <div className="flex gap-4 h-12">
-          <div className="flex items-center border border-gray-300 w-32">
-            <button 
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="px-4 text-gray-500 hover:text-black transition-colors cursor-pointer"
-            >
-              <Minus className="w-4 h-4" />
-            </button>
-            <span className="flex-1 text-center font-medium">{quantity}</span>
-            <button 
-              onClick={() => setQuantity(quantity + 1)}
-              className="px-4 text-gray-500 hover:text-black transition-colors cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
+      <div className="flex gap-3 mb-10 h-[46px]">
+        {/* Quantity */}
+        <div className="flex items-center border border-gray-200 w-24 shrink-0 bg-white">
           <button 
-            onClick={handleAddToCart}
-            className="flex-1 bg-[#333] hover:bg-[#222] text-white flex items-center justify-center gap-2 font-medium tracking-wide transition-colors cursor-pointer"
+            suppressHydrationWarning
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            className="px-3 text-gray-400 hover:text-black transition-colors cursor-pointer h-full flex items-center justify-center"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            ADD TO CART
+            <Minus className="w-3 h-3" strokeWidth={1.5} />
+          </button>
+          <span suppressHydrationWarning className="flex-1 text-center font-medium text-[13px] text-gray-700">{quantity}</span>
+          <button 
+            suppressHydrationWarning
+            onClick={() => setQuantity(quantity + 1)}
+            className="px-3 text-gray-400 hover:text-black transition-colors cursor-pointer h-full flex items-center justify-center"
+          >
+            <Plus className="w-3 h-3" strokeWidth={1.5} />
           </button>
         </div>
+        
+        {/* Add to Cart */}
         <button 
+          suppressHydrationWarning
           onClick={handleAddToCart}
-          className="w-full bg-black hover:bg-gray-900 text-white h-12 font-semibold tracking-widest uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          className="flex-1 bg-black hover:bg-[#1a1a1a] text-white flex items-center justify-center gap-2 text-[11px] font-semibold tracking-widest transition-colors cursor-pointer"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          ADD TO CART
+        </button>
+
+        {/* Buy It Now */}
+        <button 
+          suppressHydrationWarning
+          onClick={handleAddToCart}
+          className="flex-1 bg-black hover:bg-[#1a1a1a] text-white text-[11px] font-semibold tracking-widest uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer"
         >
           BUY IT NOW
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </button>
       </div>
     </>

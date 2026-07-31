@@ -18,17 +18,17 @@ export function ProductAccordion({ sections }: { sections: AccordionSection[] })
   };
 
   return (
-    <div className="border-t border-gray-200">
+    <div className="border-t border-gray-100">
       {sections.map((section, index) => {
         const isOpen = openIndex === index;
         return (
-          <div key={section.title} className="border-b border-gray-200">
+          <div key={section.title} className="border-b border-gray-100">
             <button
               onClick={() => toggle(index)}
-              className="w-full flex items-center justify-between py-4 text-sm font-semibold tracking-wider uppercase hover:text-gray-600 transition-colors text-left cursor-pointer"
+              className="w-full flex items-center justify-between py-4 text-[11px] font-semibold tracking-widest uppercase text-gray-900 hover:text-gray-600 transition-colors text-left cursor-pointer"
             >
               {section.title}
-              {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              {isOpen ? <Minus className="w-3.5 h-3.5 text-gray-400" /> : <Plus className="w-3.5 h-3.5 text-gray-400" />}
             </button>
             {isOpen && section.content && (
               <div className="pb-6 pt-2 animate-in slide-in-from-top-2 fade-in duration-200">
