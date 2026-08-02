@@ -10,11 +10,12 @@ export type CartItem = {
   image: string;
   size: string;
   quantity: number;
+  measurements?: Record<string, string>;
 };
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'id'>) => void;
+  addItem: (item: Omit<CartItem, 'id'>, openCart?: boolean) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -22,6 +23,10 @@ interface CartContextType {
   setIsCartOpen: (isOpen: boolean) => void;
   cartCount: number;
   cartTotal: number;
+  appliedDiscount: any;
+  setAppliedDiscount: (discount: any) => void;
+  promoCode: string;
+  setPromoCode: (code: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -30,6 +35,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
+  const [promoCode, setPromoCode] = useState('');
 
   // Load from local storage
   useEffect(() => {
@@ -51,9 +58,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addItem = (newItem: Omit<CartItem, 'id'>) => {
+  const addItem = (newItem: Omit<CartItem, 'id'>, openCart: boolean = true) => {
     setItems(current => {
-      const id = `${newItem.slug}-${newItem.size}`;
+      // Create a deterministic hash for measurements if they exist
+      const measurementsStr = newItem.measurements 
+        ? Object.entries(newItem.measurements).sort().map(([k,v]) => `${k}:${v}`).join('|')
+        : '';
+        
+      const id = measurementsStr ? `${newItem.slug}-${newItem.size}-${measurementsStr}` : `${newItem.slug}-${newItem.size}`;
       const existingItem = current.find(item => item.id === id);
       
       if (existingItem) {
@@ -64,7 +76,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       
       return [...current, { ...newItem, id }];
     });
-    setIsCartOpen(true);
+    if (openCart) setIsCartOpen(true);
   };
 
   const removeItem = (id: string) => {
@@ -93,7 +105,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       isCartOpen,
       setIsCartOpen,
       cartCount,
-      cartTotal
+      cartTotal,
+      appliedDiscount,
+      setAppliedDiscount,
+      promoCode,
+      setPromoCode
     }}>
       {children}
     </CartContext.Provider>

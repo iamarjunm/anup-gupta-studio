@@ -8,36 +8,35 @@ export function Footer() {
         <div className="space-y-6">
           <h4 className="text-[13px] text-gray-900 uppercase">SHOP</h4>
           <nav className="flex flex-col gap-4 text-[13px] text-gray-800">
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">New Arrivals</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Handcrafted Shirts</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Handcrafted Kurta</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Cotton Oversized Shirts</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Gift Card</Link>
+            <Link href="/collection/all" className="hover:text-black transition-colors inline-block w-fit">Shop All</Link>
+            <Link href="/collection/new-in" className="hover:text-black transition-colors inline-block w-fit">New Arrivals</Link>
+            <Link href="/collection/bestsellers" className="hover:text-black transition-colors inline-block w-fit">Bestsellers</Link>
+            <Link href="/collection/featured" className="hover:text-black transition-colors inline-block w-fit">Featured</Link>
           </nav>
         </div>
         
         <div className="space-y-6">
           <h4 className="text-[13px] text-gray-900 uppercase">HELP</h4>
           <nav className="flex flex-col gap-4 text-[13px] text-gray-800">
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Returns Policy</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Shipping/Returns</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Privacy Policy</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Terms and Conditions</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Fit Guide</Link>
+            <Link href="/returns-policy" className="hover:text-black transition-colors inline-block w-fit">Returns Policy</Link>
+            <Link href="/shipping-returns" className="hover:text-black transition-colors inline-block w-fit">Shipping/Returns</Link>
+            <Link href="/privacy-policy" className="hover:text-black transition-colors inline-block w-fit">Privacy Policy</Link>
+            <Link href="/terms-conditions" className="hover:text-black transition-colors inline-block w-fit">Terms and Conditions</Link>
+            <Link href="/fit-guide" className="hover:text-black transition-colors inline-block w-fit">Fit Guide</Link>
           </nav>
         </div>
 
         <div className="space-y-6">
           <h4 className="text-[13px] text-gray-900 uppercase">ABOUT</h4>
           <nav className="flex flex-col gap-4 text-[13px] text-gray-800">
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">The Label</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">FAQs</Link>
-            <Link href="#" className="hover:text-black transition-colors inline-block w-fit">Contact Us</Link>
+            <Link href="/about" className="hover:text-black transition-colors inline-block w-fit">The Label</Link>
+            <Link href="/faqs" className="hover:text-black transition-colors inline-block w-fit">FAQs</Link>
+            <Link href="/contact" className="hover:text-black transition-colors inline-block w-fit">Contact Us</Link>
           </nav>
         </div>
 
         <div className="space-y-6">
-          <h4 className="text-[13px] text-gray-900 uppercase mb-8">SIGN UP TO THE KOKO CLUB</h4>
+          <h4 className="text-[13px] text-gray-900 uppercase mb-8">JOIN OUR NEWSLETTER</h4>
           <form suppressHydrationWarning className="flex w-full border-b border-gray-300 pb-2 focus-within:border-black transition-colors group">
             <input 
               suppressHydrationWarning

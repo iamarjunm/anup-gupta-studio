@@ -4,10 +4,25 @@ import { useCart } from '@/contexts/CartContext';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { validateDiscountCode } from '@/app/actions/discount';
+
+
 
 export function CartSidebar() {
-  const { isCartOpen, setIsCartOpen, items, updateQuantity, removeItem, cartTotal } = useCart();
+  const { isCartOpen, setIsCartOpen, items, updateQuantity, removeItem, cartTotal, appliedDiscount, setAppliedDiscount, promoCode, setPromoCode } = useCart();
+  const [promoError, setPromoError] = useState('');
+  const [isApplying, setIsApplying] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Close cart when route changes
+  useEffect(() => {
+    setIsCartOpen(false);
+    setIsCheckingOut(false);
+  }, [pathname, setIsCartOpen]);
 
   // Prevent background scrolling when open
   useEffect(() => {
@@ -22,6 +37,19 @@ export function CartSidebar() {
   }, [isCartOpen]);
 
   if (!isCartOpen) return null;
+
+  const getFinalTotal = () => {
+    if (!appliedDiscount) return cartTotal;
+    if (appliedDiscount.discountType === 'percentage') {
+      return Math.round(cartTotal - (cartTotal * appliedDiscount.percentageOff) / 100);
+    }
+    return Math.max(0, cartTotal - appliedDiscount.percentageOff);
+  };
+
+  const handleCheckout = () => {
+    setIsCheckingOut(true);
+    router.push('/checkout');
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end">
@@ -98,20 +126,75 @@ export function CartSidebar() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="p-6 border-t border-gray-100 bg-gray-50">
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-sm font-semibold uppercase tracking-wider text-gray-900">Subtotal</span>
-              <span className="text-base font-semibold text-gray-900">Rs. {cartTotal.toLocaleString('en-IN')}</span>
+          <div className="p-6 border-t border-gray-100 bg-gray-50 flex flex-col gap-4">
+            
+            {/* Promo Code Section */}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input 
+                  type="text"
+                  placeholder="Promo code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  className="flex-1 border border-gray-200 px-3 py-2 text-xs uppercase placeholder:normal-case focus:outline-none focus:border-gray-900"
+                />
+                <button 
+                  onClick={async () => {
+                    if (!promoCode) return;
+                    setIsApplying(true);
+                    setPromoError('');
+                    const res = await validateDiscountCode(promoCode);
+                    if (res.success) {
+                       setAppliedDiscount(res.discount);
+                    } else {
+                       setPromoError(res.error || 'Invalid code');
+                       setAppliedDiscount(null);
+                    }
+                    setIsApplying(false);
+                  }}
+                  disabled={isApplying || !promoCode}
+                  className="bg-gray-900 text-white px-4 py-2 text-xs font-semibold uppercase hover:bg-black disabled:opacity-50 cursor-pointer"
+                >
+                  {isApplying ? 'Applying...' : 'Apply'}
+                </button>
+              </div>
+              {promoError && <p className="text-[10px] text-red-500">{promoError}</p>}
+              {appliedDiscount && <p className="text-[10px] text-green-600">Promo code applied successfully!</p>}
             </div>
-            <p className="text-xs text-gray-500 mb-6 tracking-wide">Shipping & taxes calculated at checkout.</p>
+
+            <div className="flex flex-col gap-2 mb-2">
+              <div className="flex justify-between items-center text-sm text-gray-500">
+                <span>Subtotal</span>
+                <span>Rs. {cartTotal.toLocaleString('en-IN')}</span>
+              </div>
+              {appliedDiscount && (
+                <div className="flex justify-between items-center text-sm text-green-600 font-medium">
+                   <span>Discount ({appliedDiscount.discountType === 'percentage' ? `${appliedDiscount.percentageOff}% OFF` : `Rs. ${appliedDiscount.percentageOff} OFF`})</span>
+                   <span>- Rs. {
+                     appliedDiscount.discountType === 'percentage' 
+                       ? Math.round((cartTotal * appliedDiscount.percentageOff) / 100).toLocaleString('en-IN')
+                       : appliedDiscount.percentageOff.toLocaleString('en-IN')
+                   }</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center text-base font-semibold text-gray-900 pt-2 border-t border-gray-200">
+                <span className="uppercase tracking-wider">Total</span>
+                <span>Rs. {getFinalTotal().toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-500 text-center tracking-wide">Shipping & taxes calculated at checkout.</p>
             <button 
-              onClick={() => {
-                alert('Checkout is not implemented yet in this demo!');
-                setIsCartOpen(false);
-              }}
-              className="w-full bg-gray-900 text-white py-4 text-xs font-semibold uppercase tracking-widest hover:bg-black transition-colors cursor-pointer"
+              onClick={handleCheckout}
+              disabled={isCheckingOut}
+              className="w-full bg-gray-900 text-white py-4 text-xs font-semibold uppercase tracking-widest hover:bg-black transition-colors cursor-pointer disabled:opacity-70 flex justify-center items-center gap-2"
             >
-              Checkout
+              {isCheckingOut ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Redirecting...
+                </>
+              ) : 'Checkout'}
             </button>
           </div>
         )}

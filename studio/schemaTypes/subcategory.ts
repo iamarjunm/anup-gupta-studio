@@ -33,10 +33,16 @@ export default defineType({
       options: { hotspot: true },
     }),
     defineField({
-      name: 'displayOnHome',
-      title: 'Display on Homepage',
+      name: 'featuredOnHome',
+      title: 'Featured on Homepage',
       type: 'boolean',
       initialValue: false,
+    }),
+    defineField({
+      name: 'sizeChartRaw',
+      title: 'Size Chart (Paste from Excel/Word)',
+      type: 'text',
+      description: 'Paste your size chart directly from Excel or Google Sheets. It will automatically be formatted into tables.',
     }),
   ],
 })

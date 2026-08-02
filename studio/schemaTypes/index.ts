@@ -12,6 +12,7 @@ import order from './order'
 import promoCountdown from './promoCountdown'
 import user from './user'
 import celebrity from './celebrity'
+import { newsletterSubscriber } from './newsletterSubscriber'
 
 export const schemaTypes = [
   category,
@@ -28,4 +29,5 @@ export const schemaTypes = [
   promoCountdown,
   user,
   celebrity,
+  newsletterSubscriber,
 ]

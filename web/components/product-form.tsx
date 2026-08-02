@@ -10,17 +10,39 @@ type ProductFormProps = {
     title: string;
     price: number;
     image: string;
-    availableSizes: string[];
+    sizes: { size: string, stock: number }[];
   };
   children?: React.ReactNode;
 };
 
 export function ProductForm({ product, children }: ProductFormProps) {
-  const [selectedSize, setSelectedSize] = useState<string>(product.availableSizes?.[0] || 'Custom');
+  const defaultSize = product.sizes?.find(s => s.stock > 0)?.size || 'Custom Tailored';
+  const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [quantity, setQuantity] = useState(1);
+  const [isAdded, setIsAdded] = useState(false);
   const { addItem } = useCart();
+  
+  const [measurements, setMeasurements] = useState<Record<string, string>>({
+    'Chest': '',
+    'Waist': '',
+    'Hips': '',
+    'Sleeve Length': '',
+    'Neck': '',
+    'Stomach': '',
+    'Shoulder': '',
+    'Shirt Length': ''
+  });
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (openCart: boolean = true) => {
+    // Basic validation for custom tailored
+    if (selectedSize === 'Custom Tailored') {
+      const missing = Object.entries(measurements).find(([_, val]) => !val.trim());
+      if (missing) {
+        alert(`Please enter your measurement for: ${missing[0]}`);
+        return;
+      }
+    }
+
     addItem({
       slug: product.slug,
       title: product.title,
@@ -28,56 +50,81 @@ export function ProductForm({ product, children }: ProductFormProps) {
       image: product.image,
       size: selectedSize,
       quantity,
-    });
+      ...(selectedSize === 'Custom Tailored' && { measurements })
+    }, openCart);
+
+    if (!openCart) {
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 2000);
+    }
   };
 
   return (
     <>
       {/* Size Selector */}
       <div className="mb-6">
-        <h3 className="text-[13px] text-gray-600 mb-3 tracking-wide">Size</h3>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {(product.availableSizes || ['Custom']).map((size: string) => (
-            <button 
-              key={size}
-              suppressHydrationWarning
-              onClick={() => setSelectedSize(size)}
-              className={`h-9 min-w-[36px] px-3 border flex items-center justify-center text-[11px] tracking-widest transition-colors cursor-pointer
-                ${selectedSize === size ? 'bg-black text-white border-black' : 'bg-white text-gray-900 border-gray-200 hover:border-black'}`}
-            >
-              {size}
-            </button>
-          ))}
-          <button 
-            suppressHydrationWarning
-            onClick={() => setSelectedSize('Custom Tailored')}
-            className={`h-9 px-4 border flex items-center justify-center text-[11px] tracking-widest transition-colors cursor-pointer
-              ${selectedSize === 'Custom Tailored' ? 'bg-black text-white border-black' : 'bg-[#fcfcfc] text-gray-600 border-gray-200 hover:border-black'}`}
-          >
-            CUSTOM TAILORED
-          </button>
+        <h3 className="text-[13px] text-gray-600 mb-3 tracking-wide flex items-center justify-between">
+          <span>Size</span>
+        </h3>
+        
+        {/* Sizes Grid */}
+        <div className="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 mb-4">
+          {(product.sizes || []).map((sizeObj: any) => {
+            const isOutOfStock = sizeObj.stock === 0;
+            return (
+              <button 
+                key={sizeObj.size}
+                disabled={isOutOfStock}
+                suppressHydrationWarning
+                onClick={() => setSelectedSize(sizeObj.size)}
+                className={`h-12 border flex flex-col items-center justify-center transition-colors
+                  ${isOutOfStock ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed' :
+                    selectedSize === sizeObj.size ? 'bg-black text-white border-black cursor-pointer' : 'bg-white text-gray-900 border-gray-200 hover:border-black cursor-pointer'}`}
+              >
+                <span className={`text-[13px] ${isOutOfStock ? 'line-through' : ''}`}>{sizeObj.size}</span>
+              </button>
+            )
+          })}
         </div>
+
+        {/* Custom Tailored Button */}
+        <button 
+          suppressHydrationWarning
+          onClick={() => setSelectedSize('Custom Tailored')}
+          className={`h-11 px-6 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
+            ${selectedSize === 'Custom Tailored' ? 'bg-black text-white border-black font-medium' : 'bg-white text-gray-900 border-gray-200 hover:border-black font-medium'}`}
+        >
+          Custom Tailored
+        </button>
+
+        {/* Custom Measurements Form */}
+        {selectedSize === 'Custom Tailored' && (
+          <div className="mt-6 mb-6 p-5 bg-[#fcfcfc] border border-gray-200 animate-in fade-in slide-in-from-top-2 duration-300">
+            <h4 className="text-[13px] font-semibold tracking-wide text-gray-900 mb-4">Enter Your Measurements (inches/cm)</h4>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.keys(measurements).map(field => (
+                <div key={field} className="flex flex-col">
+                  <label className="text-[11px] text-gray-600 mb-1">{field}</label>
+                  <input 
+                    type="text"
+                    placeholder="e.g., 38"
+                    value={measurements[field]}
+                    onChange={(e) => setMeasurements({...measurements, [field]: e.target.value})}
+                    className="h-10 px-3 border border-gray-200 text-[13px] focus:outline-none focus:border-black transition-colors"
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] text-gray-500 mt-4 leading-relaxed">
+              * Please ensure measurements are accurate. Custom tailored pieces cannot be returned.
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Style Selector */}
-      <div className="mb-6">
-        <h3 className="text-[13px] text-gray-600 mb-3 tracking-wide">Style</h3>
-        <div className="flex gap-2">
-          <button suppressHydrationWarning className="h-9 px-5 bg-black text-white text-[11px] tracking-widest cursor-pointer">
-            Only Kurta
-          </button>
-          <button suppressHydrationWarning className="h-9 px-5 border border-gray-200 text-gray-600 hover:text-black hover:border-black text-[11px] tracking-widest transition-colors cursor-pointer">
-            Kurta set with Pant
-          </button>
-        </div>
-      </div>
+
 
       {children}
-
-      {/* Notes */}
-      <p className="text-xs text-gray-600 mb-6 leading-relaxed">
-        * For custom tailored size, Please provide your size details in the Order Notes in the cart
-      </p>
 
       {/* Add to Cart Area */}
       <div className="flex gap-3 mb-10 h-[46px]">
@@ -103,17 +150,26 @@ export function ProductForm({ product, children }: ProductFormProps) {
         {/* Add to Cart */}
         <button 
           suppressHydrationWarning
-          onClick={handleAddToCart}
+          onClick={() => handleAddToCart(false)}
           className="flex-1 bg-black hover:bg-[#1a1a1a] text-white flex items-center justify-center gap-2 text-[11px] font-semibold tracking-widest transition-colors cursor-pointer"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-          ADD TO CART
+          {isAdded ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              ADDED
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              ADD TO CART
+            </>
+          )}
         </button>
 
         {/* Buy It Now */}
         <button 
           suppressHydrationWarning
-          onClick={handleAddToCart}
+          onClick={() => handleAddToCart(true)}
           className="flex-1 bg-black hover:bg-[#1a1a1a] text-white text-[11px] font-semibold tracking-widest uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer"
         >
           BUY IT NOW

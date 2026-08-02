@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { client } from '@/lib/sanity';
-import { updateUserProfile } from '@/app/actions/profile';
+import { updateUserProfile, updateUserAddresses } from '@/app/actions/profile';
+import { AddressModal, Address } from '@/components/address-modal';
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
@@ -21,6 +22,52 @@ export default function ProfilePage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  // Tabs State
+  const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'addresses' | 'settings'>('profile');
+
+  // Address Modal State
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+
+  const handleSaveAddress = async (addr: Omit<Address, '_key'> & { _key?: string }) => {
+    if (!user || !sanityUser) return;
+    
+    let currentAddresses = [...(sanityUser.addresses || [])];
+    
+    if (addr._key) {
+      // Edit existing
+      const index = currentAddresses.findIndex(a => a._key === addr._key);
+      if (index > -1) {
+        currentAddresses[index] = addr as Address;
+      }
+    } else {
+      // Add new
+      currentAddresses.push({
+        ...addr,
+        _key: Math.random().toString(36).substring(2, 9)
+      } as Address);
+    }
+
+    const result = await updateUserAddresses(user.uid, currentAddresses);
+    if (result.success) {
+      setSanityUser({ ...sanityUser, addresses: currentAddresses });
+      setIsAddressModalOpen(false);
+    } else {
+      alert(result.message);
+    }
+  };
+
+  const handleDeleteAddress = async (key: string) => {
+    if (!user || !sanityUser) return;
+    const currentAddresses = (sanityUser.addresses || []).filter((a: Address) => a._key !== key);
+    const result = await updateUserAddresses(user.uid, currentAddresses);
+    if (result.success) {
+      setSanityUser({ ...sanityUser, addresses: currentAddresses });
+    } else {
+      alert(result.message);
+    }
+  };
 
   useEffect(() => {
     // Fetch extra profile data from Sanity using the Firebase UID
@@ -96,18 +143,18 @@ export default function ProfilePage() {
           <div className="bg-[#f8f8f8] p-6 sticky top-24">
             <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 mb-6">My Account</h2>
             <nav className="space-y-1">
-              <a href="#" className="flex items-center gap-3 px-4 py-3 bg-gray-900 text-white text-sm font-medium transition-colors">
+              <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'profile' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <User className="w-4 h-4" /> Profile Details
-              </a>
-              <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 text-sm font-medium transition-colors">
+              </button>
+              <button onClick={() => setActiveTab('orders')} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'orders' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <Package className="w-4 h-4" /> Order History
-              </a>
-              <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 text-sm font-medium transition-colors">
+              </button>
+              <button onClick={() => setActiveTab('addresses')} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'addresses' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <MapPin className="w-4 h-4" /> Addresses
-              </a>
-              <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 text-sm font-medium transition-colors">
+              </button>
+              <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'settings' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <Settings className="w-4 h-4" /> Settings
-              </a>
+              </button>
               <div className="pt-4 mt-4 border-t border-gray-200">
                 <a href="#" onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors cursor-pointer">
                   <LogOut className="w-4 h-4" /> Log Out
@@ -119,72 +166,159 @@ export default function ProfilePage() {
 
         {/* Main Content */}
         <div className="flex-1 w-full">
-          <h1 className="text-2xl font-semibold uppercase tracking-wide text-gray-900 mb-8">
-            Profile Details
-          </h1>
-          
-          <div className="bg-white border border-gray-200 p-8">
-            <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-100">
-              <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center text-gray-400">
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-8 h-8" />
-                )}
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900">{sanityUser?.name || user.displayName || 'Loading...'}</h3>
-                <p className="text-sm text-gray-500">{user.email}</p>
-                {sanityUser?.isAdmin && <span className="inline-block mt-2 px-2 py-1 bg-gray-900 text-white text-xs font-semibold rounded tracking-wide">Admin</span>}
-              </div>
-            </div>
-
-            <form onSubmit={handleSave} className="space-y-6 max-w-xl">
-              {saveMessage && (
-                <div className={`p-4 text-sm flex items-center gap-2 ${saveMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
-                  {saveMessage.type === 'success' && <CheckCircle2 className="w-4 h-4" />}
-                  {saveMessage.text}
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Full Name</label>
-                <input 
-                  type="text" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-900 transition-colors" 
-                />
-              </div>
+          {activeTab === 'profile' && (
+            <>
+              <h1 className="text-2xl font-semibold uppercase tracking-wide text-gray-900 mb-8">
+                Profile Details
+              </h1>
               
-              <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Email Address</label>
-                <input type="email" value={user.email || ''} className="w-full border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-900 transition-colors bg-gray-50 text-gray-500 cursor-not-allowed" disabled />
-              </div>
+              <div className="bg-white border border-gray-200 p-8">
+                <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-100">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center text-gray-400">
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-8 h-8" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">{sanityUser?.name || user.displayName || 'Loading...'}</h3>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                    {sanityUser?.isAdmin && <span className="inline-block mt-2 px-2 py-1 bg-gray-900 text-white text-xs font-semibold rounded tracking-wide">Admin</span>}
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Phone Number</label>
-                <input 
-                  type="tel" 
-                  value={phoneNumber} 
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="+91 98765 43210" 
-                  className="w-full border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-900 transition-colors" 
-                />
-              </div>
+                <form onSubmit={handleSave} className="space-y-6 max-w-xl">
+                  {saveMessage && (
+                    <div className={`p-4 text-sm flex items-center gap-2 ${saveMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                      {saveMessage.type === 'success' && <CheckCircle2 className="w-4 h-4" />}
+                      {saveMessage.text}
+                    </div>
+                  )}
 
-              <div className="pt-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Full Name</label>
+                    <input 
+                      type="text" 
+                      value={name} 
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-900 transition-colors" 
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Email Address</label>
+                    <input type="email" value={user.email || ''} className="w-full border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-900 transition-colors bg-gray-50 text-gray-500 cursor-not-allowed" disabled />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Phone Number</label>
+                    <input 
+                      type="tel" 
+                      value={phoneNumber} 
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="+91 98765 43210" 
+                      className="w-full border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-900 transition-colors" 
+                    />
+                  </div>
+
+                  <div className="pt-4">
+                    <button 
+                      type="submit" 
+                      disabled={isSaving}
+                      className="bg-gray-900 cursor-pointer text-white px-8 py-3 text-xs font-semibold uppercase tracking-wider hover:bg-black transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                      {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                      {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'orders' && (
+            <>
+              <h1 className="text-2xl font-semibold uppercase tracking-wide text-gray-900 mb-8">
+                Order History
+              </h1>
+              <div className="bg-white border border-gray-200 p-8 text-center py-20 text-gray-500">
+                <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p>No orders found yet.</p>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'addresses' && (
+            <>
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="text-2xl font-semibold uppercase tracking-wide text-gray-900">
+                  Addresses
+                </h1>
                 <button 
-                  type="submit" 
-                  disabled={isSaving}
-                  className="bg-gray-900 cursor-pointer text-white px-8 py-3 text-xs font-semibold uppercase tracking-wider hover:bg-black transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  onClick={() => { setEditingAddress(null); setIsAddressModalOpen(true); }}
+                  className="bg-gray-900 text-white px-4 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
                 >
-                  {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {isSaving ? 'Saving...' : 'Save Changes'}
+                  Add New Address
                 </button>
               </div>
-            </form>
-          </div>
+              <div className="bg-white border border-gray-200 p-8">
+                {sanityUser?.addresses?.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {sanityUser.addresses.map((addr: Address, i: number) => (
+                      <div key={addr._key || i} className="p-6 border border-gray-200 flex flex-col justify-between h-full bg-gray-50/50">
+                        <div>
+                          <p className="font-semibold text-sm text-gray-900 mb-2">{sanityUser.name}</p>
+                          <p className="text-sm text-gray-600">{addr.street}</p>
+                          <p className="text-sm text-gray-600">{addr.city}, {addr.state} {addr.postalCode}</p>
+                          <p className="text-sm text-gray-600">{addr.country}</p>
+                        </div>
+                        <div className="flex gap-4 mt-6 pt-4 border-t border-gray-200">
+                          <button 
+                            onClick={() => { setEditingAddress(addr); setIsAddressModalOpen(true); }}
+                            className="text-xs font-semibold text-gray-600 hover:text-black uppercase tracking-wider cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteAddress(addr._key)}
+                            className="text-xs font-semibold text-red-500 hover:text-red-700 uppercase tracking-wider cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10 text-gray-500">
+                    <MapPin className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No saved addresses found.</p>
+                  </div>
+                )}
+              </div>
+              <AddressModal 
+                isOpen={isAddressModalOpen} 
+                onClose={() => setIsAddressModalOpen(false)} 
+                onSave={handleSaveAddress}
+                initialAddress={editingAddress}
+              />
+            </>
+          )}
+
+          {activeTab === 'settings' && (
+            <>
+              <h1 className="text-2xl font-semibold uppercase tracking-wide text-gray-900 mb-8">
+                Settings
+              </h1>
+              <div className="bg-white border border-gray-200 p-8">
+                <p className="text-sm text-gray-600 mb-6">Manage your account preferences.</p>
+                <button onClick={handleLogout} className="px-6 py-3 border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors">
+                  Sign out of all devices
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
       </div>

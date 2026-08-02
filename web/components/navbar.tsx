@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, User, ShoppingBag, Menu, X, ChevronRight } from 'lucide-react';
+import { Search, User, ShoppingBag, Menu, X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { SearchModal } from './search-modal';
 import { AuthModal } from './auth-modal';
@@ -11,45 +11,52 @@ import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useCart } from '@/contexts/CartContext';
 
-const KURTA_LINKS = [
-  "HANDCRAFTED KURTA",
-  "HAND EMBROIDERED COLOURFUL CLASSICS",
-  "LINEN COLLECTION",
-  "VISCOSE CLASSIC",
-  "PRINTED KURTA",
-  "KOKO'S WEDDING",
-  "VIEW ALL"
-];
+// Removed hardcoded links
 
-const LINEN_LINKS = [
-  "LINEN KURTA",
-  "LINEN SHIRTS"
-];
-
-function NavItem({ label, href = "#", links, images, rightAlign = false }: { label: string, href?: string, links?: string[], images?: { src: string, label: string }[], rightAlign?: boolean }) {
+function NavItem({ label, href = "#", links, columns, images, rightAlign = false }: { label: string, href?: string, links?: { label: string, href: string }[], columns?: { title?: string, links: { label: string, href: string }[] }[], images?: { src: string, label: string, href: string }[], rightAlign?: boolean }) {
   return (
     <div className="group h-full flex items-center">
       <Link href={href} className="text-gray-900 hover:text-gray-500 transition-colors h-full flex items-center gap-1 group-hover:text-gray-500">
         {label}
       </Link>
       
-      {links && (
-        <div className="absolute top-[80px] left-0 w-full bg-white border-t border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+      {(links || columns) && (
+        <div className="absolute top-[64px] left-0 w-full bg-white border-t border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
           <div className="max-w-[1600px] mx-auto px-8 py-10 flex">
-            {/* Links Column */}
-            <div className="w-[400px] flex flex-col gap-4">
-              {links.map((link) => (
-                <Link key={link} href="#" className="text-sm font-medium tracking-wide text-gray-900 hover:text-gray-500 transition-colors uppercase">
-                  {link}
-                </Link>
-              ))}
-            </div>
+            {/* Standard Links Column */}
+            {links && !columns && (
+              <div className="w-[400px] flex flex-col gap-4">
+                {links.map((link) => (
+                  <Link key={link.label} href={link.href} className="text-sm font-medium tracking-wide text-gray-900 hover:text-gray-500 transition-colors uppercase">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+            
+            {/* Multiple Columns Layout */}
+            {columns && (
+              <div className="flex gap-16">
+                {columns.map((col, idx) => (
+                  <div key={idx} className="flex flex-col gap-4 w-[250px]">
+                    {col.title && (
+                      <h4 className="text-xs text-gray-500 font-semibold tracking-widest uppercase mb-1">{col.title}</h4>
+                    )}
+                    {col.links.map((link) => (
+                      <Link key={link.label} href={link.href} className="text-sm font-medium tracking-wide text-gray-900 hover:text-gray-500 transition-colors uppercase">
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
             
             {/* Images Columns */}
             {images && (
               <div className="flex-1 flex gap-6 justify-end">
                 {images.map((img, i) => (
-                  <div key={i} className="relative w-[300px] aspect-[3/4] group/img overflow-hidden">
+                  <Link href={img.href} key={i} className="relative w-[300px] aspect-[3/4] group/img overflow-hidden cursor-pointer block">
                     <Image 
                       src={img.src}
                       alt={img.label}
@@ -60,7 +67,7 @@ function NavItem({ label, href = "#", links, images, rightAlign = false }: { lab
                     <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
                        <span className="text-white text-xs font-semibold uppercase tracking-wider">{img.label}</span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -71,11 +78,32 @@ function NavItem({ label, href = "#", links, images, rightAlign = false }: { lab
   );
 }
 
-export function Navbar() {
+export function Navbar({ announcements, navigation }: { announcements?: any[], navigation?: any }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const { user } = useAuth();
+  const [currentAnnouncementIndex, setCurrentAnnouncementIndex] = useState(0);
+  const { user, sanityUser } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
+
+  const activeAnnouncements = announcements && announcements.length > 0 
+    ? announcements 
+    : [{ text: "All our products are Size-Inclusive" }];
+
+  useEffect(() => {
+    if (activeAnnouncements.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentAnnouncementIndex((prev) => (prev + 1) % activeAnnouncements.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [activeAnnouncements.length]);
+
+  const nextAnnouncement = () => {
+    setCurrentAnnouncementIndex((prev) => (prev + 1) % activeAnnouncements.length);
+  };
+
+  const prevAnnouncement = () => {
+    setCurrentAnnouncementIndex((prev) => (prev - 1 + activeAnnouncements.length) % activeAnnouncements.length);
+  };
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -90,12 +118,31 @@ export function Navbar() {
 
   return (
     <>
-      <div className="bg-[#1c1c1c] text-white text-[11px] sm:text-xs py-2.5 text-center font-bold tracking-wide">
-        All our products are Size-Inclusive
+      <div className="bg-[#1c1c1c] text-white py-2.5 relative flex items-center justify-center">
+        {activeAnnouncements.length > 1 && (
+          <button suppressHydrationWarning onClick={prevAnnouncement} className="absolute left-4 md:left-8 text-gray-400 hover:text-white transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        )}
+        
+        <div className="text-[11px] sm:text-xs text-center font-bold tracking-wide animate-in fade-in duration-500" key={currentAnnouncementIndex}>
+          {activeAnnouncements[currentAnnouncementIndex].text}{' '}
+          {activeAnnouncements[currentAnnouncementIndex].code && (
+            <span className={activeAnnouncements[currentAnnouncementIndex].codeColor || "text-gray-300"}>
+              {activeAnnouncements[currentAnnouncementIndex].code}
+            </span>
+          )}
+        </div>
+
+        {activeAnnouncements.length > 1 && (
+          <button suppressHydrationWarning onClick={nextAnnouncement} className="absolute right-4 md:right-8 text-gray-400 hover:text-white transition-colors">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        )}
       </div>
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
         {/* Mobile Header */}
-        <div className="lg:hidden px-4 h-[60px] flex items-center justify-between">
+        <div className="lg:hidden px-4 h-[52px] flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
             <button 
               className="text-gray-900 hover:text-gray-600 transition-colors p-1 -ml-1"
@@ -128,7 +175,7 @@ export function Navbar() {
         </div>
 
         {/* Desktop Header */}
-        <div className="hidden lg:flex px-8 h-[80px] items-center justify-between max-w-[1800px] mx-auto">
+        <div className="hidden lg:flex px-8 h-[64px] items-center justify-between max-w-[1800px] mx-auto">
           {/* Logo */}
           <Link href="/" className="flex flex-col shrink-0 w-[200px]">
             <svg viewBox="0 0 100 30" className="h-7 w-auto mb-1 self-start">
@@ -141,38 +188,59 @@ export function Navbar() {
 
           {/* Navigation */}
           <nav className="flex gap-6 xl:gap-8 text-[11px] font-semibold tracking-wider uppercase h-full flex-1 justify-center">
-            <NavItem label="New In" href="/collections/new-in" />
-            <NavItem label="Shirts" href="/collections/shirts" />
+            {navigation?.categories?.map((cat: any) => {
+              const links = cat.subcategories?.length > 0 ? cat.subcategories.map((sub: any) => ({
+                label: sub.title,
+                href: `/category/${sub.slug}`
+              })) : undefined;
+
+              const images = [];
+              if (cat.imageUrl) {
+                images.push({ src: cat.imageUrl, label: `All ${cat.title} Products`, href: `/category/${cat.slug}` });
+              }
+              const subWithImage = cat.subcategories?.find((sub: any) => sub.imageUrl);
+              if (subWithImage) {
+                images.push({ src: subWithImage.imageUrl, label: `All ${subWithImage.title} Products`, href: `/category/${subWithImage.slug}` });
+              }
+
+              return (
+                <NavItem 
+                  key={cat.slug} 
+                  label={cat.title} 
+                  href={`/category/${cat.slug}`}
+                  links={links}
+                  images={images.length > 0 ? images : undefined}
+                />
+              );
+            })}
+            
+            {/* Shop By Dropdown */}
             <NavItem 
-              label="Kurtas" 
-              href="/collections/kurtas"
-              links={KURTA_LINKS}
-              images={[
-                { src: "https://picsum.photos/seed/kurtacol1/600/800", label: "ALL KURTA COLLECTION" },
-                { src: "https://picsum.photos/seed/kurtacol2/600/800", label: "HAND EMBROIDERED KURTA" }
-              ]}
+              label="Shop By" 
+              columns={[
+                {
+                  title: 'Collections',
+                  links: (navigation?.collections || []).map((col: any) => ({
+                    label: col.title,
+                    href: `/collection/${col.slug}`
+                  }))
+                },
+                {
+                  title: 'Featured',
+                  links: [
+                    { label: 'Shop All', href: '/collection/all' },
+                    { label: 'New Arrivals', href: '/collection/new-in' },
+                    { label: 'Bestsellers', href: '/collection/bestsellers' },
+                  ]
+                }
+              ]} 
             />
-            <NavItem label="Bundi Kurta" href="/collections/bundi-kurta" />
-            <NavItem label="Tuxedo" href="/collections/tuxedo" />
-            <NavItem label="Bandhgala" href="/collections/bandhgala" />
-            <NavItem 
-              label="Linen Luxe" 
-              href="/collections/linen-luxe"
-              links={LINEN_LINKS}
-              images={[
-                { src: "https://picsum.photos/seed/linencol1/600/800", label: "LINEN LUXE" },
-                { src: "https://picsum.photos/seed/linencol2/600/800", label: "LINEN COLLECTION" }
-              ]}
-            />
-            <NavItem label="Printed Luxe Kurta" href="/collections/printed-luxe-kurta" />
-            <NavItem label="Accessories" href="/collections/accessories" />
-            <NavItem label="Shop By" links={["OCCASION", "COLOR", "PRICE"]} />
           </nav>
 
           {/* Icons */}
           <div className="flex items-center gap-5 justify-end w-[200px] h-full">
             <SearchModal triggerClass="text-gray-900 hover:text-gray-500 transition-colors p-1" />
-            <div className="relative group/profile h-[80px] flex items-center">
+            <div className="relative group/profile h-full flex items-center">
               {user ? (
                 <Link href="/profile" className="text-gray-900 hover:text-gray-500 transition-colors p-1 flex items-center h-full">
                   <User className="w-[18px] h-[18px]" strokeWidth={2} />
@@ -189,6 +257,9 @@ export function Navbar() {
                     <div className="px-4 py-2 border-b border-gray-100 mb-1">
                       <span className="block text-[11px] font-semibold text-gray-900 truncate">{user.displayName || user.email}</span>
                     </div>
+                    {sanityUser?.isAdmin && (
+                      <Link href="/admin" className="px-4 py-2.5 text-[11px] font-bold tracking-wider uppercase text-blue-600 hover:bg-blue-50 transition-colors">Admin Portal</Link>
+                    )}
                     <Link href="/profile" className="px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Profile</Link>
                     <Link href="/profile" className="px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Track Orders</Link>
                     <button onClick={() => signOut(auth)} className="text-left cursor-pointer px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-red-600 hover:bg-gray-50 transition-colors border-t border-gray-100 mt-1 pt-3.5 w-full">Logout</button>
@@ -235,33 +306,27 @@ export function Navbar() {
             
             <div className="flex-1 overflow-y-auto py-4">
               <nav className="flex flex-col text-[13px] font-semibold tracking-wider uppercase text-gray-900">
-                <Link href="/collections/new-in" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link href="/collection/new-in" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
                   New In <ChevronRight className="w-4 h-4 text-gray-400" />
                 </Link>
-                <Link href="/collections/shirts" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
-                  Shirts <ChevronRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link href="/collections/kurtas" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
-                  Kurtas <ChevronRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link href="/collections/bundi-kurta" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
-                  Bundi Kurta <ChevronRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link href="/collections/tuxedo" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
-                  Tuxedo <ChevronRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link href="/collections/bandhgala" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
-                  Bandhgala <ChevronRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link href="/collections/linen-luxe" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
-                  Linen Luxe <ChevronRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link href="/collections/printed-luxe-kurta" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
-                  Printed Luxe Kurta <ChevronRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link href="/collections/accessories" className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
-                  Accessories <ChevronRight className="w-4 h-4 text-gray-400" />
-                </Link>
+                {navigation?.categories?.map((cat: any) => (
+                  <div key={cat.slug} className="flex flex-col border-b border-gray-50">
+                    <Link href={`/category/${cat.slug}`} className="px-6 py-4 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
+                      {cat.title} <ChevronRight className="w-4 h-4 text-gray-400" />
+                    </Link>
+                    {cat.subcategories?.map((sub: any) => (
+                      <Link key={sub.slug} href={`/category/${sub.slug}`} className="px-10 py-3 text-[11px] text-gray-600 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
+                        {sub.title}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+                
+                {navigation?.collections?.map((col: any) => (
+                  <Link key={col.slug} href={`/collection/${col.slug}`} className="px-6 py-4 border-b border-gray-50 flex items-center justify-between" onClick={() => setIsMobileMenuOpen(false)}>
+                    {col.title} <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </Link>
+                ))}
               </nav>
             </div>
             

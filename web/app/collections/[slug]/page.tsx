@@ -2,8 +2,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ProductCard } from '@/components/product-card';
 import { ChevronDown, Grid3x3, LayoutGrid } from 'lucide-react';
+import { client } from '@/lib/sanity';
+import { COLLECTION_INFO_QUERY, PRODUCTS_BY_COLLECTION_QUERY } from '@/lib/queries';
 
-const PRODUCTS = [
+const FALLBACK_PRODUCTS = [
   { title: "Narasimha Hand Embroidered Designer Kurta - Black", price: 16750, seed: "k1", isNew: false },
   { title: "Bobcat Hand Embroidered Designer Shawl Set With Kurta And Pant", price: 16900, seed: "k2", isNew: true },
   { title: "Botanic Hand Embroidered Designer Kurta - Red", price: 10500, seed: "k3", isNew: true },
@@ -19,16 +21,25 @@ const PRODUCTS = [
 export default async function CollectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   
+  const [collectionInfo, fetchedProducts] = await Promise.all([
+    client.fetch(COLLECTION_INFO_QUERY, { slug }).catch(() => null),
+    client.fetch(PRODUCTS_BY_COLLECTION_QUERY, { slug }).catch(() => [])
+  ]);
+
+  const title = collectionInfo?.title || slug.replace(/-/g, ' ').toUpperCase();
+  const description = collectionInfo?.description || 'From Timeless Comfort to Occasion Elegance.';
+  
+  const products = fetchedProducts.length > 0 ? fetchedProducts : FALLBACK_PRODUCTS;
+
   return (
     <div className="max-w-[1800px] mx-auto px-4 lg:px-8 py-8 md:py-12">
       {/* Header */}
       <div className="mb-12">
         <h1 className="text-2xl md:text-3xl font-semibold uppercase tracking-wide text-gray-900 mb-4">
-          ALL KURTA COLLECTION
+          {title}
         </h1>
         <div className="text-sm text-gray-900 font-medium">
-          Ease to Elegance: Kurta Collection<br />
-          <span className="italic text-gray-600 font-normal">From Timeless Comfort to Occasion Elegance.</span>
+          {description}
         </div>
       </div>
 
@@ -61,9 +72,9 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
 
       {/* Product Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-4 gap-y-12">
-        {PRODUCTS.map((product, i) => (
-          <div key={i} className="relative group">
-            {product.isNew && (
+        {products.map((product: any, i: number) => (
+          <div key={product.slug || product.seed || i} className="relative group">
+            {product.newArrival && (
               <div className="absolute top-3 left-3 z-10 bg-[#222] text-white text-[10px] font-medium px-2 py-1 rounded-full shadow-sm">
                 New
               </div>
@@ -71,9 +82,9 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
             <ProductCard 
               title={product.title}
               price={product.price}
-              imageUrl={`https://picsum.photos/seed/${product.seed}/400/533`}
-              hoverImageUrl={`https://picsum.photos/seed/${product.seed}_hover/400/533`}
-              href={`/product/sample-product`}
+              imageUrl={product.imageUrl || (product.seed ? `https://picsum.photos/seed/${product.seed}/400/533` : `https://picsum.photos/seed/placeholder/400/533`)}
+              hoverImageUrl={product.hoverImageUrl || (product.seed ? `https://picsum.photos/seed/${product.seed}_hover/400/533` : undefined)}
+              href={`/product/${product.slug || 'sample-product'}`}
             />
           </div>
         ))}

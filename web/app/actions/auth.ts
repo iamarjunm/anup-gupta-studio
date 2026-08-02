@@ -1,6 +1,16 @@
 'use server';
 
-import { writeClient } from '@/lib/sanity';
+import { writeClient, client } from '@/lib/sanity';
+
+export async function getSanityUser(uid: string) {
+  try {
+    const user = await client.fetch(`*[_type == "user" && firebaseUid == $uid][0]`, { uid });
+    return user;
+  } catch (error) {
+    console.error('Error fetching Sanity user:', error);
+    return null;
+  }
+}
 
 export async function syncUserWithSanity({
   uid,

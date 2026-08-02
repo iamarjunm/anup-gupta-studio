@@ -37,8 +37,8 @@ export default defineType({
       initialValue: 0,
     }),
     defineField({
-      name: 'displayOnHome',
-      title: 'Display on Homepage',
+      name: 'featuredOnHome',
+      title: 'Featured on Homepage',
       type: 'boolean',
       initialValue: false,
     }),
@@ -72,6 +72,12 @@ export default defineType({
           ],
         },
       ],
+    }),
+    defineField({
+      name: 'sizeChartRaw',
+      title: 'Size Chart (Paste from Excel/Word)',
+      type: 'text',
+      description: 'Paste your size chart directly from Excel or Google Sheets. It will automatically be formatted into tables.',
     }),
   ],
 })

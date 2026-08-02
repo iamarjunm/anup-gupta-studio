@@ -24,6 +24,7 @@ export function ProductAccordion({ sections }: { sections: AccordionSection[] })
         return (
           <div key={section.title} className="border-b border-gray-100">
             <button
+              suppressHydrationWarning
               onClick={() => toggle(index)}
               className="w-full flex items-center justify-between py-4 text-[11px] font-semibold tracking-widest uppercase text-gray-900 hover:text-gray-600 transition-colors text-left cursor-pointer"
             >

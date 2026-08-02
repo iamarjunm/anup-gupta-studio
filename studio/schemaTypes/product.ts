@@ -69,22 +69,19 @@ export default defineType({
       description: 'Optional collections this product belongs to (e.g., Summer 2026)',
     }),
     defineField({
-      name: 'availableSizes',
-      title: 'Available Sizes',
+      name: 'sizes',
+      title: 'Sizes & Stock',
       type: 'array',
-      of: [{ type: 'string' }],
-      options: {
-        list: [
-          { title: 'XXS', value: 'xxs' },
-          { title: 'XS', value: 'xs' },
-          { title: 'S', value: 's' },
-          { title: 'M', value: 'm' },
-          { title: 'L', value: 'l' },
-          { title: 'XL', value: 'xl' },
-          { title: 'XXL', value: 'xxl' },
-          { title: 'Custom', value: 'custom' },
-        ],
-      },
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'size', type: 'string', title: 'Size (e.g. S, M, L)' },
+            { name: 'stock', type: 'number', title: 'Stock Quantity', initialValue: 0 }
+          ]
+        }
+      ],
+      description: 'Define available sizes and their corresponding stock quantities.'
     }),
     defineField({
       name: 'newArrival',
