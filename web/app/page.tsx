@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from 'react';
-import { HeroCarousel } from "@/components/hero-carousel";
+
 import { ProductCard } from "@/components/product-card";
 import { SectionHeader } from "@/components/section-header";
 import { ShieldCheck, Award, ThumbsUp } from "lucide-react";
