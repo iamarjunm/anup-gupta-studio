@@ -28,7 +28,7 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
   if (!isOpen) return null;
 
   const handleChange = (name: string, value: any) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleImageUpload = async (name: string, e: React.ChangeEvent<HTMLInputElement>) => {
