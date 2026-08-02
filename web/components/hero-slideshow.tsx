@@ -6,7 +6,15 @@ import Autoplay from 'embla-carousel-autoplay';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const SLIDES = [
+interface Slide {
+  heading1?: string;
+  heading2?: string;
+  description?: string;
+  imageUrl?: string;
+  link?: string;
+}
+
+const SLIDES: Slide[] = [
   {
     imageUrl: "https://picsum.photos/seed/hero_slide_1/1920/1080",
     heading1: "From Dawn Till Dusk",
@@ -27,13 +35,7 @@ const SLIDES = [
   }
 ];
 
-interface Slide {
-  heading1?: string;
-  heading2?: string;
-  description?: string;
-  imageUrl?: string;
-  link?: string;
-}
+
 
 export function HeroSlideshow({ slides }: { slides?: Slide[] }) {
   const activeSlides = slides && slides.length > 0 ? slides : SLIDES;
