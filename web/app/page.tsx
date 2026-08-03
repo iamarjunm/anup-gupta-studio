@@ -59,8 +59,6 @@ const mapProduct = (product: any) => ({
   sizes: product.sizes
 });
 
-import { Loader2 } from 'lucide-react';
-
 function HomeLoader() {
   return (
     <div className="w-full min-h-screen flex flex-col">

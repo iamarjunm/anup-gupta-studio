@@ -11,7 +11,6 @@ import { ProductGallery } from '@/components/product-gallery';
 import { SizeChartModal } from '@/components/size-chart-modal';
 import { ProductCard } from '@/components/product-card';
 import { Suspense } from 'react';
-import { Loader2 } from 'lucide-react';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 

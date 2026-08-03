@@ -12,7 +12,6 @@ import {
 } from '@/lib/queries';
 import { CollectionGrid } from '@/components/collection-grid';
 import { Suspense } from 'react';
-import { Loader2 } from 'lucide-react';
 
 function CollectionGridLoader() {
   return (
