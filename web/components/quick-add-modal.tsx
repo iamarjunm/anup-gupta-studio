@@ -11,15 +11,20 @@ interface QuickAddModalProps {
     title: string;
     price: number;
     image: string;
+    slug: string;
+    sizes?: { size: string; stock?: number }[];
   };
 }
 
-const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL', 'Custom Tailored'];
-const COLORS = ['Black'];
+import { useCart } from '@/contexts/CartContext';
+
+const DEFAULT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL', 'Custom Tailored'];
 
 export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) {
-  const [selectedSize, setSelectedSize] = useState('XS');
-  const [selectedColor, setSelectedColor] = useState('Black');
+  const { addItem } = useCart();
+  const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes.map(s => s.size) : DEFAULT_SIZES;
+  
+  const [selectedSize, setSelectedSize] = useState(availableSizes[0] || 'XS');
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
@@ -73,7 +78,7 @@ export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) 
             <div>
               <p className="text-sm font-medium text-gray-900 mb-3">Size</p>
               <div className="flex flex-wrap gap-2">
-                {SIZES.map((size) => (
+                {availableSizes.map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
@@ -84,26 +89,6 @@ export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) 
                     }`}
                   >
                     {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Color */}
-            <div>
-              <p className="text-sm font-medium text-gray-900 mb-3">Color</p>
-              <div className="flex flex-wrap gap-2">
-                {COLORS.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={`px-6 py-2.5 text-sm border transition-colors ${
-                      selectedColor === color
-                        ? 'bg-black text-white border-black'
-                        : 'border-gray-200 text-gray-700 hover:border-gray-900'
-                    }`}
-                  >
-                    {color}
                   </button>
                 ))}
               </div>
@@ -129,9 +114,17 @@ export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) 
             </div>
             
             <button 
-              className="flex-1 bg-black text-white h-12 flex items-center justify-center gap-2 font-semibold text-sm hover:bg-gray-900 transition-colors"
+              className="flex-1 bg-black text-white h-12 flex items-center justify-center gap-2 font-semibold text-sm hover:bg-gray-900 transition-colors disabled:opacity-50"
+              disabled={!selectedSize}
               onClick={() => {
-                // Handle add to cart logic here
+                addItem({
+                  slug: product.slug,
+                  title: product.title,
+                  price: product.price,
+                  image: product.image,
+                  size: selectedSize,
+                  quantity: quantity
+                });
                 onClose();
               }}
             >

@@ -13,9 +13,11 @@ interface ProductCardProps {
   imageUrl: string;
   hoverImageUrl?: string;
   href: string;
+  slug?: string;
+  sizes?: { size: string; stock?: number }[];
 }
 
-export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageUrl, href }: ProductCardProps) {
+export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageUrl, href, slug, sizes }: ProductCardProps) {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   return (
@@ -86,7 +88,9 @@ export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageU
         product={{
           title,
           price,
-          image: imageUrl
+          image: imageUrl,
+          slug: slug || href.split('/').pop() || '',
+          sizes: sizes
         }}
       />
     </>

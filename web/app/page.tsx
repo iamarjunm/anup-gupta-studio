@@ -54,10 +54,33 @@ const mapProduct = (product: any) => ({
   originalPrice: product.compareAtPrice || product.originalPrice,
   imageUrl: product.imageUrl || (product.seed ? `https://picsum.photos/seed/${product.seed}/600/800` : undefined),
   hoverImageUrl: product.hoverImageUrl || (product.seed ? `https://picsum.photos/seed/${product.seed}_hover/600/800` : undefined),
-  href: `/product/${product.slug || 'sample-product'}`
+  href: `/product/${product.slug || 'sample-product'}`,
+  slug: product.slug,
+  sizes: product.sizes
 });
 
-export default async function Home() {
+import { Loader2 } from 'lucide-react';
+
+function HomeLoader() {
+  return (
+    <div className="w-full min-h-screen flex flex-col">
+      {/* Hero Skeleton */}
+      <div className="w-full h-[80vh] md:h-screen bg-gray-100 animate-pulse"></div>
+      {/* Section Skeleton */}
+      <div className="max-w-[1600px] mx-auto px-4 lg:px-8 py-16 w-full">
+        <div className="h-6 w-64 bg-gray-200 mb-8 animate-pulse"></div>
+        <div className="flex gap-4 overflow-hidden">
+           <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse"></div>
+           <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse"></div>
+           <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse"></div>
+           <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse hidden md:block"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function HomeContent() {
   // Fetch real data from Sanity concurrently
   const [heroRaw, categoriesRaw, marqueeRaw, newArrivalsRaw, bestsellersRaw, featuredSectionsRaw, celebritiesRaw, settingsRaw] = await Promise.all([
     client.fetch(HERO_QUERY).catch(() => []),
@@ -261,5 +284,13 @@ export default async function Home() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<HomeLoader />}>
+      <HomeContent />
+    </Suspense>
   );
 }

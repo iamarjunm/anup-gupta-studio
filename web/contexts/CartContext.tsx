@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 export type CartItem = {
   id: string; // usually slug + size
@@ -58,7 +58,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addItem = (newItem: Omit<CartItem, 'id'>, openCart: boolean = true) => {
+  const addItem = useCallback((newItem: Omit<CartItem, 'id'>, openCart: boolean = true) => {
     setItems(current => {
       // Create a deterministic hash for measurements if they exist
       const measurementsStr = newItem.measurements 
@@ -77,20 +77,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...current, { ...newItem, id }];
     });
     if (openCart) setIsCartOpen(true);
-  };
+  }, []);
 
-  const removeItem = (id: string) => {
+  const removeItem = useCallback((id: string) => {
     setItems(current => current.filter(item => item.id !== id));
-  };
+  }, []);
 
-  const updateQuantity = (id: string, quantity: number) => {
-    if (quantity < 1) return removeItem(id);
+  const updateQuantity = useCallback((id: string, quantity: number) => {
+    if (quantity < 1) {
+      setItems(current => current.filter(item => item.id !== id));
+      return;
+    }
     setItems(current => current.map(item => item.id === id ? { ...item, quantity } : item));
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([]);
-  };
+  }, []);
 
   const cartCount = items.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);

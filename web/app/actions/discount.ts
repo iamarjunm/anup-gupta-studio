@@ -5,6 +5,7 @@ import { client } from '@/lib/sanity';
 export async function validateDiscountCode(code: string) {
   try {
     const query = `*[_type == "discountCode" && code == $code && isActive == true][0] {
+      code,
       discountType,
       percentageOff,
       minimumPurchaseAmount

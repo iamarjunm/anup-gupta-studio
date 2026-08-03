@@ -9,6 +9,7 @@ import { auth } from '@/lib/firebase';
 import { client } from '@/lib/sanity';
 import { updateUserProfile, updateUserAddresses } from '@/app/actions/profile';
 import { AddressModal, Address } from '@/components/address-modal';
+import { InvoiceTemplate } from '@/components/invoice';
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
@@ -25,6 +26,11 @@ export default function ProfilePage() {
 
   // Tabs State
   const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'addresses' | 'settings'>('profile');
+
+  // Orders State
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   // Address Modal State
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
@@ -88,6 +94,26 @@ export default function ProfilePage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (activeTab === 'orders' && user?.uid && orders.length === 0) {
+      const fetchOrders = async () => {
+        setLoadingOrders(true);
+        try {
+          const fetchedOrders = await client.fetch(
+            `*[_type == "order" && userId == $uid] | order(createdAt desc)`,
+            { uid: user.uid }
+          );
+          setOrders(fetchedOrders);
+        } catch (err) {
+          console.error("Failed to fetch orders", err);
+        } finally {
+          setLoadingOrders(false);
+        }
+      };
+      fetchOrders();
+    }
+  }, [activeTab, user?.uid]);
+
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
     await signOut(auth);
@@ -143,16 +169,16 @@ export default function ProfilePage() {
           <div className="bg-[#f8f8f8] p-6 sticky top-24">
             <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 mb-6">My Account</h2>
             <nav className="space-y-1">
-              <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'profile' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <button onClick={() => { setActiveTab('profile'); setSelectedOrder(null); }} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'profile' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <User className="w-4 h-4" /> Profile Details
               </button>
-              <button onClick={() => setActiveTab('orders')} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'orders' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <button onClick={() => { setActiveTab('orders'); setSelectedOrder(null); }} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'orders' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <Package className="w-4 h-4" /> Order History
               </button>
-              <button onClick={() => setActiveTab('addresses')} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'addresses' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <button onClick={() => { setActiveTab('addresses'); setSelectedOrder(null); }} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'addresses' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <MapPin className="w-4 h-4" /> Addresses
               </button>
-              <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'settings' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
+              <button onClick={() => { setActiveTab('settings'); setSelectedOrder(null); }} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'settings' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                 <Settings className="w-4 h-4" /> Settings
               </button>
               <div className="pt-4 mt-4 border-t border-gray-200">
@@ -239,13 +265,156 @@ export default function ProfilePage() {
 
           {activeTab === 'orders' && (
             <>
-              <h1 className="text-2xl font-semibold uppercase tracking-wide text-gray-900 mb-8">
-                Order History
-              </h1>
-              <div className="bg-white border border-gray-200 p-8 text-center py-20 text-gray-500">
-                <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p>No orders found yet.</p>
-              </div>
+              {selectedOrder ? (
+                <div>
+                  <div className="flex justify-between items-center mb-6">
+                    <button 
+                      onClick={() => setSelectedOrder(null)}
+                      className="text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-900 flex items-center gap-2"
+                    >
+                      ← Back to Orders
+                    </button>
+                    <button 
+                      onClick={() => window.print()}
+                      className="text-xs font-semibold uppercase tracking-wider bg-gray-900 text-white px-4 py-2 hover:bg-black transition-colors"
+                    >
+                      Download Invoice
+                    </button>
+                  </div>
+                  <h1 className="text-2xl font-semibold uppercase tracking-wide text-gray-900 mb-2">
+                    Order {selectedOrder.orderNumber}
+                  </h1>
+                  <p className="text-sm text-gray-500 mb-8">Placed on {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                  
+                  <div className="bg-white border border-gray-200 p-8 space-y-8">
+                    <div className="flex flex-col md:flex-row justify-between gap-6 pb-8 border-b border-gray-100">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Status</p>
+                        <span className={`inline-block px-4 py-2 text-xs font-bold uppercase tracking-wider ${
+                          selectedOrder.status === 'processing' ? 'bg-blue-50 text-blue-600' :
+                          selectedOrder.status === 'shipped' ? 'bg-yellow-50 text-yellow-600' :
+                          selectedOrder.status === 'delivered' ? 'bg-green-50 text-green-600' :
+                          'bg-gray-50 text-gray-600'
+                        }`}>
+                          {selectedOrder.status || 'Processing'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Shipping Address</p>
+                        <p className="text-sm font-medium text-gray-900">{selectedOrder.customerName}</p>
+                        <p className="text-sm text-gray-600 mt-1">{selectedOrder.shippingAddress?.street}</p>
+                        <p className="text-sm text-gray-600">{selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} {selectedOrder.shippingAddress?.postalCode}</p>
+                        <p className="text-sm text-gray-600">{selectedOrder.shippingAddress?.country}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-4">Items Ordered</p>
+                      <div className="space-y-4">
+                        {selectedOrder.items?.map((item: any) => (
+                          <div key={item._key} className="flex justify-between items-center p-4 border border-gray-100 bg-gray-50/50">
+                            <div>
+                              <p className="font-medium text-gray-900">{item.productTitle}</p>
+                              <p className="text-gray-500 text-xs mt-1">Size: {item.variantSize} | Color: {item.variantColor} | Qty: {item.quantity}</p>
+                            </div>
+                            <p className="font-medium text-gray-900">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-8 border-t border-gray-100">
+                      <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
+                        <span>Subtotal</span>
+                        <span>Rs. {selectedOrder.subtotal?.toLocaleString('en-IN') || selectedOrder.total.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+                        <span>Shipping</span>
+                        <span>{selectedOrder.shippingCost === 0 ? 'Free' : `Rs. ${selectedOrder.shippingCost?.toLocaleString('en-IN') || 0}`}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-lg font-semibold text-gray-900">
+                        <span>Total Paid</span>
+                        <span>Rs. {selectedOrder.total.toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <InvoiceTemplate order={selectedOrder} />
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-2xl font-semibold uppercase tracking-wide text-gray-900 mb-8">
+                    Order History
+                  </h1>
+                  
+                  {loadingOrders ? (
+                    <div className="bg-white border border-gray-200 p-8 text-center py-20 flex justify-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                    </div>
+                  ) : orders.length > 0 ? (
+                    <div className="space-y-6">
+                      {orders.map((order: any) => (
+                        <div 
+                          key={order._id} 
+                          onClick={() => setSelectedOrder(order)}
+                          className="bg-white border border-gray-200 p-6 hover:border-gray-400 transition-colors cursor-pointer group"
+                        >
+                          <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center border-b border-gray-100 pb-4 mb-4 gap-4">
+                            <div>
+                              <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Order Number</p>
+                              <p className="font-semibold text-gray-900 group-hover:text-black transition-colors">{order.orderNumber}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Date</p>
+                              <p className="font-medium text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Total</p>
+                              <p className="font-medium text-gray-900">Rs. {order.total.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Status</p>
+                              <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                                order.status === 'processing' ? 'bg-blue-50 text-blue-600' :
+                                order.status === 'shipped' ? 'bg-yellow-50 text-yellow-600' :
+                                order.status === 'delivered' ? 'bg-green-50 text-green-600' :
+                                'bg-gray-50 text-gray-600'
+                              }`}>
+                                {order.status || 'Processing'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            {order.items?.map((item: any) => (
+                              <div key={item._key} className="flex justify-between items-center text-sm">
+                                <div className="flex gap-4 items-center">
+                                  <div>
+                                    <p className="font-medium text-gray-900">{item.productTitle}</p>
+                                    <p className="text-gray-500 text-xs mt-0.5">Size: {item.variantSize} | Qty: {item.quantity}</p>
+                                  </div>
+                                </div>
+                                <p className="font-medium text-gray-900">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</p>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <div className="mt-6 pt-4 border-t border-gray-100 text-right">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 group-hover:text-gray-900 transition-colors">
+                              View Details →
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-white border border-gray-200 p-8 text-center py-20 text-gray-500">
+                      <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No orders found yet.</p>
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
 

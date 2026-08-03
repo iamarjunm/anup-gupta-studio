@@ -17,14 +17,25 @@ export function SizeChartModal({ sizeChart, sizeChartRaw }: { sizeChart?: any, s
     let currentRows: string[][] = [];
 
     lines.forEach(line => {
-      const cells = line.split('\t').map(c => c.trim());
+      // Split by tab, or if no tabs, split by 2+ spaces, or commas
+      let cells: string[] = [];
+      if (line.includes('\t')) {
+        cells = line.split('\t');
+      } else if (line.includes(',')) {
+        cells = line.split(',');
+      } else {
+        cells = line.split(/\s{2,}/);
+      }
+      
+      cells = cells.map(c => c.trim()).filter(Boolean);
+
       if (cells.length > 1) {
         if (currentHeaders.length === 0) {
           currentHeaders = cells;
         } else {
           currentRows.push(cells);
         }
-      } else {
+      } else if (cells.length === 1) {
         if (currentHeaders.length > 0 || currentRows.length > 0) {
           sections.push({ title: currentTitle, headers: currentHeaders, rows: currentRows });
           currentTitle = '';
@@ -48,7 +59,7 @@ export function SizeChartModal({ sizeChart, sizeChartRaw }: { sizeChart?: any, s
     sections = [{ title: '', headers: sizeChart.headers, rows: sizeChart.rows?.map((r: any) => r.cells) || [] }];
   }
 
-  if (sections.length === 0) return null;
+  if (sections.length === 0 && !sizeChartRaw) return null;
 
   return (
     <>
@@ -73,7 +84,7 @@ export function SizeChartModal({ sizeChart, sizeChartRaw }: { sizeChart?: any, s
             </div>
             
             <div className="p-6 overflow-y-auto space-y-12">
-              {sections.map((section, idx) => (
+              {sections.length > 0 ? sections.map((section, idx) => (
                 <div key={idx}>
                   {section.title && (
                     <h3 className="text-sm font-bold tracking-widest text-gray-900 uppercase mb-6 bg-gray-50 p-4 border-l-4 border-black">
@@ -101,7 +112,11 @@ export function SizeChartModal({ sizeChart, sizeChartRaw }: { sizeChart?: any, s
                     </table>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="bg-gray-50 p-6 whitespace-pre-wrap font-mono text-sm text-gray-700">
+                  {sizeChartRaw}
+                </div>
+              )}
             </div>
           </div>
         </div>

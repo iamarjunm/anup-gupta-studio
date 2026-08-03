@@ -42,6 +42,8 @@ export function CollectionGrid({ products, highestPrice = 0 }: { products: any[]
                 imageUrl={product.imageUrl || `https://picsum.photos/seed/placeholder/400/533`}
                 hoverImageUrl={product.hoverImageUrl || undefined}
                 href={`/product/${product.slug || 'sample-product'}`}
+                slug={product.slug}
+                sizes={product.sizes}
               />
             </div>
           ))}

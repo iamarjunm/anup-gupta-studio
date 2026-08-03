@@ -84,6 +84,8 @@ export function SearchModal({ triggerClass }: { triggerClass?: string }) {
                     imageUrl={product.imageUrl}
                     hoverImageUrl={product.hoverImageUrl}
                     href={`/product/${product.slug || 'sample-product'}`}
+                    slug={product.slug}
+                    sizes={product.sizes}
                   />
                 ))}
               </div>

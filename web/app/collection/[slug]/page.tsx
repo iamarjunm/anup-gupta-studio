@@ -11,12 +11,34 @@ import {
   ALL_BESTSELLERS_QUERY 
 } from '@/lib/queries';
 import { CollectionGrid } from '@/components/collection-grid';
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
-export default async function CollectionPage(props: { params: Promise<{ slug: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const params = await props.params;
-  const searchParams = await props.searchParams;
+function CollectionGridLoader() {
+  return (
+    <div className="w-full mt-4">
+      <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
+        <div className="h-4 w-24 bg-gray-200 animate-pulse"></div>
+        <div className="h-8 w-24 bg-gray-200 animate-pulse"></div>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-x-6 md:gap-y-10">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-3">
+            <div className="w-full aspect-[3/4] bg-gray-100 animate-pulse"></div>
+            <div className="h-3 w-3/4 bg-gray-200 animate-pulse"></div>
+            <div className="h-3 w-1/4 bg-gray-200 animate-pulse"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+async function CollectionPageContent({ paramsPromise, searchParamsPromise }: { paramsPromise: Promise<{ slug: string }>, searchParamsPromise: Promise<any> }) {
+  const params = await paramsPromise;
+  const searchParams = await searchParamsPromise;
   const { slug } = params;
-  
+
   let fetchedProducts = [];
   let collectionInfo = null;
 
@@ -87,8 +109,7 @@ export default async function CollectionPage(props: { params: Promise<{ slug: st
     });
   }
   return (
-    <div className="max-w-[1800px] mx-auto px-4 lg:px-8 py-8 md:py-12">
-      {/* Header */}
+    <>
       <div className="mb-12">
         <h1 className="text-2xl md:text-3xl font-semibold uppercase tracking-wide text-gray-900 mb-4">
           {title}
@@ -99,6 +120,16 @@ export default async function CollectionPage(props: { params: Promise<{ slug: st
       </div>
 
       <CollectionGrid products={products} highestPrice={highestPrice} />
+    </>
+  );
+}
+
+export default function CollectionPage(props: { params: Promise<{ slug: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  return (
+    <div className="max-w-[1800px] mx-auto px-4 lg:px-8 py-8 md:py-12">
+      <Suspense fallback={<CollectionGridLoader />}>
+        <CollectionPageContent paramsPromise={props.params} searchParamsPromise={props.searchParams} />
+      </Suspense>
     </div>
   );
 }

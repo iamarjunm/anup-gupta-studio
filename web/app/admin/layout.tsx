@@ -77,7 +77,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {[
             { title: 'Products', keys: ['product', 'category', 'subcategory', 'collection'] },
-            { title: 'Marketing', keys: ['heroSection', 'marquee', 'announcementBar', 'discountCode', 'promoCountdown', 'celebrity'] },
+            { title: 'Marketing', keys: ['heroSection', 'marquee', 'announcementBar', 'discountCode', 'celebrity'] },
           ].map(group => (
             <div key={group.title}>
               <button 
@@ -118,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div>
             <h3 className="px-3 text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Configuration</h3>
             <div className="space-y-1">
-              {['contactForm', 'siteSettings'].map(key => {
+              {['contactForm', 'newsletterSubscriber', 'siteSettings'].map(key => {
                 const schema = cmsSchemas.find(s => s.name === key);
                 if (!schema) return null;
                 const href = `/admin/content/${schema.name}`;

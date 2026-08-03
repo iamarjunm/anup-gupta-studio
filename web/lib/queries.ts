@@ -4,7 +4,8 @@ export const SEARCH_PRODUCTS_QUERY = `*[_type == "product" && (title match $quer
   compareAtPrice,
   "slug": slug.current,
   "imageUrl": mainImage.asset->url,
-  "hoverImageUrl": gallery[0].asset->url
+  "hoverImageUrl": gallery[0].asset->url,
+  sizes
 }`;
 
 export const NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true][0...5] {
@@ -13,7 +14,8 @@ export const NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true][0
   compareAtPrice,
   "slug": slug.current,
   "imageUrl": mainImage.asset->url,
-  "hoverImageUrl": gallery[0].asset->url
+  "hoverImageUrl": gallery[0].asset->url,
+  sizes
 }`;
 
 export const BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true][0...5] {
@@ -22,7 +24,8 @@ export const BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true][0.
   compareAtPrice,
   "slug": slug.current,
   "imageUrl": mainImage.asset->url,
-  "hoverImageUrl": gallery[0].asset->url
+  "hoverImageUrl": gallery[0].asset->url,
+  sizes
 }`;
 
 export const FEATURED_SECTIONS_QUERY = `*[(_type == "category" || _type == "subcategory") && (featuredOnHome == true || displayOnHome == true)] | order(order asc) {
@@ -34,7 +37,8 @@ export const FEATURED_SECTIONS_QUERY = `*[(_type == "category" || _type == "subc
     compareAtPrice,
     "slug": slug.current,
     "imageUrl": mainImage.asset->url,
-    "hoverImageUrl": gallery[0].asset->url
+    "hoverImageUrl": gallery[0].asset->url,
+    sizes
   }
 }`;
 
@@ -55,7 +59,8 @@ export const PRODUCT_BY_SLUG_QUERY = `*[_type == "product" && slug.current == $s
   sizes,
   fabric,
   lookAfterMe,
-  "sizeChartRaw": coalesce(categories[0]->sizeChartRaw, categories->sizeChartRaw),
+  "sizeChartRaw": coalesce((categories[]->sizeChartRaw)[@ != null && @ != ""][0], (subcategories[]->sizeChartRaw)[@ != null && @ != ""][0]),
+  "sizeChart": coalesce((categories[]->sizeChart)[@ != null][0], (subcategories[]->sizeChart)[@ != null][0]),
   "categorySlugs": categories[]->slug.current,
   "subcategorySlugs": subcategories[]->slug.current,
   "singleCategorySlug": categories->slug.current,
@@ -187,5 +192,6 @@ export const RELATED_PRODUCTS_QUERY = `*[_type == "product" && slug.current != $
   "imageUrl": mainImage.asset->url,
   "hoverImageUrl": gallery[0].asset->url,
   bestseller,
-  newArrival
+  newArrival,
+  sizes
 }`;

@@ -72,6 +72,16 @@ export default defineType({
       type: 'number',
     }),
     defineField({
+      name: 'discountCode',
+      title: 'Discount Code',
+      type: 'string',
+    }),
+    defineField({
+      name: 'discountAmount',
+      title: 'Discount Amount',
+      type: 'number',
+    }),
+    defineField({
       name: 'tax',
       title: 'Tax',
       type: 'number',

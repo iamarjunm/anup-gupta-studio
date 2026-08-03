@@ -10,11 +10,39 @@ import { RichText } from '@/components/rich-text';
 import { ProductGallery } from '@/components/product-gallery';
 import { SizeChartModal } from '@/components/size-chart-modal';
 import { ProductCard } from '@/components/product-card';
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
-export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+function ProductLoader() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 xl:gap-20 items-start w-full">
+      <div className="lg:col-span-7 xl:col-span-7 w-full flex flex-col md:flex-row gap-4">
+         <div className="hidden md:flex flex-col gap-4">
+           <div className="w-[100px] aspect-[3/4] bg-gray-100 animate-pulse"></div>
+           <div className="w-[100px] aspect-[3/4] bg-gray-100 animate-pulse"></div>
+           <div className="w-[100px] aspect-[3/4] bg-gray-100 animate-pulse"></div>
+         </div>
+         <div className="flex-1 w-full aspect-[3/4] bg-gray-100 animate-pulse"></div>
+      </div>
+      <div className="lg:col-span-5 xl:col-span-5 pt-4">
+        <div className="h-6 w-3/4 bg-gray-200 mb-6 animate-pulse"></div>
+        <div className="h-4 w-1/4 bg-gray-200 mb-12 animate-pulse"></div>
+        <div className="h-12 w-full bg-gray-100 mb-8 animate-pulse"></div>
+        <div className="h-12 w-full bg-gray-50 mb-12 animate-pulse"></div>
+        <div className="space-y-4">
+          <div className="h-4 w-full bg-gray-100 animate-pulse"></div>
+          <div className="h-4 w-full bg-gray-100 animate-pulse"></div>
+          <div className="h-4 w-2/3 bg-gray-100 animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ slug: string }> }) {
+  const { slug } = await paramsPromise;
   
   // Fetch data in parallel
   const [fetchedProduct, settings] = await Promise.all([
@@ -82,7 +110,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const mainImage = images[0];
 
   return (
-    <div className="max-w-[1600px] w-full mx-auto px-4 lg:px-8 xl:px-12 py-8 md:py-12">
+    <>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 xl:gap-20 items-start">
         
         {/* Left Side - Images */}
@@ -174,11 +202,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 imageUrl={rp.imageUrl}
                 hoverImageUrl={rp.hoverImageUrl}
                 href={`/product/${rp.slug}`}
+                slug={rp.slug}
+                sizes={rp.sizes}
               />
             ))}
           </div>
         </div>
       )}
+    </>
+  );
+}
+
+export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+  return (
+    <div className="max-w-[1600px] w-full mx-auto px-4 lg:px-8 xl:px-12 py-8 md:py-12">
+      <Suspense fallback={<ProductLoader />}>
+        <ProductPageContent paramsPromise={params} />
+      </Suspense>
     </div>
   );
 }

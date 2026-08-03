@@ -23,9 +23,13 @@ export default async function RootLayout({children}: {children: React.ReactNode}
       <body className="antialiased bg-white" suppressHydrationWarning>
         <AuthProvider>
           <CartProvider>
-            <Navbar announcements={announcements} navigation={navigationData} />
+            <div className="print:hidden">
+              <Navbar announcements={announcements} navigation={navigationData} />
+            </div>
             {children}
-            <Footer />
+            <div className="print:hidden">
+              <Footer />
+            </div>
             <CartSidebar />
           </CartProvider>
         </AuthProvider>

@@ -6,28 +6,33 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
+import Script from 'next/script';
 import { client } from '@/lib/sanity';
 import { updateUserProfile, updateUserAddresses } from '@/app/actions/profile';
 import { AddressModal, Address } from '@/components/address-modal';
 
-const loadRazorpay = () => {
+const checkRazorpayLoaded = () => {
   return new Promise((resolve) => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
+    if (typeof window !== 'undefined' && (window as any).Razorpay) {
+      resolve(true);
+    } else {
+      // Give it a brief moment if still loading
+      setTimeout(() => {
+        resolve(typeof window !== 'undefined' && !!(window as any).Razorpay);
+      }, 500);
+    }
   });
 };
 
 export default function CheckoutPage() {
-  const { items, cartTotal, appliedDiscount, clearCart } = useCart();
+  const { items, cartTotal, appliedDiscount, clearCart, promoCode } = useCart();
   const { user } = useAuth();
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [sanityUser, setSanityUser] = useState<any>(null);
+  const [shippingSettings, setShippingSettings] = useState<{ enabled: boolean, cost: number, threshold: number }>({ enabled: false, cost: 0, threshold: Infinity });
   
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [selectedAddressKey, setSelectedAddressKey] = useState<string | null>(null);
@@ -42,12 +47,6 @@ export default function CheckoutPage() {
     postalCode: '',
     country: 'India',
   });
-
-  useEffect(() => {
-    if (items.length === 0) {
-      router.push('/');
-    }
-  }, [items, router]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -75,19 +74,46 @@ export default function CheckoutPage() {
       }
       setIsLoading(false);
     };
+
+    const fetchSiteSettings = async () => {
+      try {
+        const settings = await client.fetch(`*[_type == "siteSettings"][0]{shippingSettings}`);
+        if (settings?.shippingSettings?.shippingEnabled) {
+          setShippingSettings({
+            enabled: true,
+            cost: settings.shippingSettings.standardShippingCost || 0,
+            threshold: settings.shippingSettings.freeShippingThreshold || Infinity,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch shipping settings", error);
+      }
+    };
+
     fetchUserData();
+    fetchSiteSettings();
   }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const getFinalTotal = () => {
+  const getDiscountedSubtotal = () => {
     if (!appliedDiscount) return cartTotal;
     if (appliedDiscount.discountType === 'percentage') {
       return Math.round(cartTotal - (cartTotal * appliedDiscount.percentageOff) / 100);
     }
     return Math.max(0, cartTotal - appliedDiscount.percentageOff);
+  };
+
+  const getShippingCost = () => {
+    if (!shippingSettings.enabled) return 0;
+    if (cartTotal >= shippingSettings.threshold) return 0;
+    return shippingSettings.cost;
+  };
+
+  const getFinalTotal = () => {
+    return getDiscountedSubtotal() + getShippingCost();
   };
 
   const handlePayNow = async (e: React.FormEvent) => {
@@ -121,19 +147,23 @@ export default function CheckoutPage() {
       }
 
       // 2. Razorpay Flow
-      const res = await loadRazorpay();
+      const res = await checkRazorpayLoaded();
       if (!res) {
         alert('Razorpay SDK failed to load. Are you online?');
         setIsProcessing(false);
         return;
       }
 
-      const finalAmount = getFinalTotal();
+      const orderPayload = {
+        items: items,
+        discountCode: appliedDiscount?.code || promoCode || undefined,
+        shippingCost: getShippingCost(),
+      };
 
       const orderRes = await fetch('/api/razorpay/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: finalAmount })
+        body: JSON.stringify(orderPayload)
       });
       const orderData = await orderRes.json();
       
@@ -141,6 +171,44 @@ export default function CheckoutPage() {
         alert('Could not create order: ' + (orderData.error || 'Unknown error'));
         setIsProcessing(false);
         return;
+      }
+
+      // If total is 0, skip Razorpay entirely and verify directly (or redirect if we create an endpoint)
+      // Since Razorpay requires amount >= 1, we can't open Razorpay for 0 amount.
+      if (orderData.serverCalculatedTotal === 0) {
+         try {
+           const verifyRes = await fetch('/api/razorpay/verify', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({
+               razorpay_order_id: 'FREE_ORDER_' + Math.random().toString(36).substring(7),
+               razorpay_payment_id: 'FREE_PAYMENT',
+               razorpay_signature: 'SKIP_VERIFICATION', // Our backend should accept this if total is 0
+               items: items,
+               shippingAddress: finalAddress,
+               customerDetails: {
+                 name: formData.name,
+                 email: formData.email,
+                 phone: formData.phoneNumber,
+                 userId: user?.uid || null,
+               },
+               discountCode: orderPayload.discountCode,
+               subtotal: orderData.serverCalculatedSubtotal || cartTotal,
+               shippingCost: getShippingCost(),
+               total: 0,
+             })
+           });
+           const verifyData = await verifyRes.json();
+           if (verifyRes.ok) {
+             router.push(`/checkout/success?orderId=${verifyData.orderNumber}`);
+           } else {
+             alert('Order creation failed: ' + verifyData.error);
+           }
+         } catch(e) {
+             alert('An error occurred during order creation');
+         }
+         setIsProcessing(false);
+         return;
       }
 
       const options = {
@@ -159,14 +227,25 @@ export default function CheckoutPage() {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
+                items: items,
+                shippingAddress: finalAddress,
+                customerDetails: {
+                  name: formData.name,
+                  email: formData.email,
+                  phone: formData.phoneNumber,
+                  userId: user?.uid || null,
+                },
+                discountCode: orderPayload.discountCode,
+                subtotal: orderData.serverCalculatedSubtotal || cartTotal,
+                shippingCost: getShippingCost(),
+                total: orderData.serverCalculatedTotal || getFinalTotal(),
               })
             });
 
             const verifyData = await verifyRes.json();
 
             if (verifyRes.ok) {
-              clearCart();
-              router.push('/checkout/success');
+              router.push(`/checkout/success?orderId=${verifyData.orderNumber}`);
             } else {
               alert('Payment verification failed: ' + verifyData.error);
             }
@@ -219,12 +298,29 @@ export default function CheckoutPage() {
     }
   };
 
-  if (isLoading || items.length === 0) {
+  if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>;
   }
 
+  if (items.length === 0) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
+        <h2 className="text-2xl font-semibold uppercase tracking-widest text-gray-900 mb-4">Your cart is empty</h2>
+        <p className="text-gray-500 mb-8 max-w-md">Looks like you haven't added anything to your cart yet.</p>
+        <button 
+          onClick={() => router.push('/')}
+          className="bg-black text-white px-8 py-3 text-xs font-semibold uppercase tracking-widest hover:bg-gray-900 transition-colors"
+        >
+          Continue Shopping
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#f8f8f8] py-12 lg:py-16 px-4">
+    <>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      <div className="min-h-screen bg-[#f8f8f8] py-12 lg:py-16 px-4">
       <div className="max-w-[1200px] mx-auto flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
         
         {/* Left Form */}
@@ -344,7 +440,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between items-center text-sm text-gray-500">
                 <span>Shipping</span>
-                <span>Calculated at next step</span>
+                <span>{getShippingCost() === 0 ? 'Free' : `Rs. ${getShippingCost().toLocaleString('en-IN')}`}</span>
               </div>
               {appliedDiscount && (
                 <div className="flex justify-between items-center text-sm text-green-600 font-medium">
@@ -387,5 +483,6 @@ export default function CheckoutPage() {
         onSave={handleSaveAddress}
       />
     </div>
+    </>
   );
 }
