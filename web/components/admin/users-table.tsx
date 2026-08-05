@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { UserCircle } from 'lucide-react';
+import { UserCircle, Download } from 'lucide-react';
 import { UserDetailsModal } from './user-details-modal';
+import { useToast } from '@/contexts/ToastContext';
 
 export function UsersTable({ initialUsers }: { initialUsers: any[] }) {
   const [users, setUsers] = useState(initialUsers);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const { toast } = useToast();
 
   const handleRoleChange = (userId: string, isAdmin: boolean) => {
     setUsers(users.map(u => u._id === userId ? { ...u, isAdmin } : u));
@@ -15,9 +17,52 @@ export function UsersTable({ initialUsers }: { initialUsers: any[] }) {
     }
   };
 
+  const handleExport = () => {
+    if (users.length === 0) {
+      toast("No data to export.", "warning");
+      return;
+    }
+    
+    const headers = '"Name","Email","Role","Auth Provider","Joined Date"';
+    const rows = users.map(user => {
+      return [
+        `"${String(user.name || 'Anonymous User').replace(/"/g, '""')}"`,
+        `"${String(user.email || 'No email provided').replace(/"/g, '""')}"`,
+        `"${user.isAdmin ? 'Admin' : 'Customer'}"`,
+        `"${String(user.authProvider || 'email').replace(/"/g, '""')}"`,
+        `"${new Date(user.createdAt).toLocaleDateString()}"`
+      ].join(',');
+    });
+    
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'users_export.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
-      <div className="overflow-x-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Users</h1>
+          <p className="text-sm text-gray-500 mt-1">Directory of all registered customers and admins.</p>
+        </div>
+        <button 
+          onClick={handleExport}
+          className="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export All
+        </button>
+      </div>
+
+      <div className="overflow-x-auto bg-white rounded-xl border border-gray-100 shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-50 text-gray-500 font-medium">
             <tr>

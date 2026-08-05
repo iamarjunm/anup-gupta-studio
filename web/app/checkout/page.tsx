@@ -10,6 +10,7 @@ import Script from 'next/script';
 import { client } from '@/lib/sanity';
 import { updateUserProfile, updateUserAddresses } from '@/app/actions/profile';
 import { AddressModal, Address } from '@/components/address-modal';
+import { useToast } from '@/contexts/ToastContext';
 
 const checkRazorpayLoaded = () => {
   return new Promise((resolve) => {
@@ -28,6 +29,7 @@ export default function CheckoutPage() {
   const { items, cartTotal, appliedDiscount, clearCart, promoCode } = useCart();
   const { user } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -132,7 +134,7 @@ export default function CheckoutPage() {
 
       if (user?.uid && sanityUser?.addresses?.length > 0) {
         if (!selectedAddressKey) {
-          alert("Please select a shipping address.");
+          toast("Please select a shipping address.", "error");
           setIsProcessing(false);
           return;
         }
@@ -141,7 +143,7 @@ export default function CheckoutPage() {
       }
 
       if (!user?.uid && (!finalAddress.street || !finalAddress.city || !finalAddress.state || !finalAddress.postalCode)) {
-        alert("Please fill in all shipping details.");
+        toast("Please fill in all shipping details.", "error");
         setIsProcessing(false);
         return;
       }
@@ -149,7 +151,7 @@ export default function CheckoutPage() {
       // 2. Razorpay Flow
       const res = await checkRazorpayLoaded();
       if (!res) {
-        alert('Razorpay SDK failed to load. Are you online?');
+        toast('Razorpay SDK failed to load. Are you online?', 'error');
         setIsProcessing(false);
         return;
       }
@@ -168,13 +170,12 @@ export default function CheckoutPage() {
       const orderData = await orderRes.json();
       
       if (!orderRes.ok) {
-        alert('Could not create order: ' + (orderData.error || 'Unknown error'));
+        toast('Could not create order: ' + (orderData.error || 'Unknown error'), 'error');
         setIsProcessing(false);
         return;
       }
 
       // If total is 0, skip Razorpay entirely and verify directly (or redirect if we create an endpoint)
-      // Since Razorpay requires amount >= 1, we can't open Razorpay for 0 amount.
       if (orderData.serverCalculatedTotal === 0) {
          try {
            const verifyRes = await fetch('/api/razorpay/verify', {
@@ -183,7 +184,7 @@ export default function CheckoutPage() {
              body: JSON.stringify({
                razorpay_order_id: 'FREE_ORDER_' + Math.random().toString(36).substring(7),
                razorpay_payment_id: 'FREE_PAYMENT',
-               razorpay_signature: 'SKIP_VERIFICATION', // Our backend should accept this if total is 0
+               razorpay_signature: 'SKIP_VERIFICATION',
                items: items,
                shippingAddress: finalAddress,
                customerDetails: {
@@ -200,12 +201,13 @@ export default function CheckoutPage() {
            });
            const verifyData = await verifyRes.json();
            if (verifyRes.ok) {
+             clearCart();
              router.push(`/checkout/success?orderId=${verifyData.orderNumber}`);
            } else {
-             alert('Order creation failed: ' + verifyData.error);
+             toast('Order creation failed: ' + verifyData.error, 'error');
            }
          } catch(e) {
-             alert('An error occurred during order creation');
+             toast('An error occurred during order creation', 'error');
          }
          setIsProcessing(false);
          return;
@@ -245,12 +247,15 @@ export default function CheckoutPage() {
             const verifyData = await verifyRes.json();
 
             if (verifyRes.ok) {
+              clearCart();
               router.push(`/checkout/success?orderId=${verifyData.orderNumber}`);
             } else {
-              alert('Payment verification failed: ' + verifyData.error);
+              toast('Payment verification failed: ' + verifyData.error, 'error');
             }
           } catch (err) {
-            alert('An error occurred during verification');
+            toast('An error occurred during verification', 'error');
+          } finally {
+            setIsProcessing(false);
           }
         },
         prefill: {
@@ -265,14 +270,14 @@ export default function CheckoutPage() {
 
       const paymentObject = new (window as any).Razorpay(options);
       paymentObject.on('payment.failed', function (response: any) {
-        alert(response.error.description);
+        toast(response.error.description, 'error');
+        setIsProcessing(false);
       });
       paymentObject.open();
 
     } catch (error) {
       console.error(error);
-      alert('Checkout failed. Please try again.');
-    } finally {
+      toast('Checkout failed. Please try again.', 'error');
       setIsProcessing(false);
     }
   };
@@ -293,8 +298,9 @@ export default function CheckoutPage() {
       setSanityUser({ ...sanityUser, addresses: currentAddresses });
       setSelectedAddressKey(newAddr._key);
       setIsAddressModalOpen(false);
+      toast("Address saved successfully", "success");
     } else {
-      alert(result.message);
+      toast(result.message || "Failed to save address", "error");
     }
   };
 

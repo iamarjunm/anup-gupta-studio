@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { SchemaConfig } from '@/lib/schema-config';
 import { updateDocument, createDocument } from '@/app/actions/cms';
+import { useToast } from '@/contexts/ToastContext';
 
 export function SiteSettingsEditor({ schema, initialDoc }: { schema: SchemaConfig, initialDoc: any }) {
   const [formData, setFormData] = useState<any>(initialDoc || {});
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   // Helper for deeply nested updates
   const updateField = (path: string[], value: any) => {
@@ -38,19 +40,24 @@ export function SiteSettingsEditor({ schema, initialDoc }: { schema: SchemaConfi
       }
     });
 
-    let res;
-    if (initialDoc?._id) {
-      res = await updateDocument(initialDoc._id, dataToSave);
-    } else {
-      res = await createDocument('siteSettings', dataToSave);
-    }
+    try {
+      let res;
+      if (initialDoc?._id) {
+        res = await updateDocument(initialDoc._id, dataToSave);
+      } else {
+        res = await createDocument('siteSettings', dataToSave);
+      }
 
-    if (res?.success) {
-      alert('Settings saved successfully!');
-    } else {
-      alert('Failed to save settings: ' + res?.message);
+      if (res?.success) {
+        toast('Settings saved successfully!', 'success');
+      } else {
+        toast('Failed to save settings: ' + (res?.message || 'Unknown error'), 'error');
+      }
+    } catch (e: any) {
+      toast(e.message || 'Failed to save settings', 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

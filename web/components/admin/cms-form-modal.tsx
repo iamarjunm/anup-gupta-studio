@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import { X, Upload, Loader2 } from 'lucide-react';
 import { SchemaConfig, FieldConfig } from '@/lib/schema-config';
-import { uploadImageToSanity, fetchReferences, createDocument, updateDocument } from '@/app/actions/cms';
+import { createDocument, updateDocument, uploadImageToSanity, fetchReferences } from '@/app/actions/cms';
+import { useToast } from '@/contexts/ToastContext';
 
 export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema: SchemaConfig, doc?: any, isOpen: boolean, onClose: () => void, onSaved: (doc: any) => void }) {
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [references, setReferences] = useState<Record<string, any[]>>({});
+  const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen) {
@@ -39,11 +41,15 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
     const fd = new FormData();
     fd.append('file', file);
     
-    const res = await uploadImageToSanity(fd);
-    if (res.success) {
-      handleChange(name, res.asset);
-    } else {
-      alert('Image upload failed');
+    try {
+      const res = await uploadImageToSanity(fd);
+      if (res.success && res.asset) {
+        handleChange(name, res.asset);
+      } else {
+        toast('Image upload failed', 'error');
+      }
+    } catch (error) {
+      toast('Image upload failed', 'error');
     }
     setLoading(false);
   };
@@ -85,20 +91,26 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
       }
     });
 
-    let res;
-    if (doc?._id) {
-      res = await updateDocument(doc._id, dataToSave);
-    } else {
-      res = await createDocument(schema.name, dataToSave);
-    }
+    try {
+      let res;
+      if (doc?._id) {
+        res = await updateDocument(doc._id, dataToSave);
+      } else {
+        res = await createDocument(schema.name, dataToSave);
+      }
 
-    if (res?.success) {
-      onSaved(res.data);
-      onClose();
-    } else {
-      alert('Failed to save document: ' + res?.message);
+      if (res?.success) {
+        toast(doc ? 'Document updated successfully' : 'Document created successfully', 'success');
+        onSaved(res.data);
+        onClose();
+      } else {
+        toast(res?.message || 'Failed to save document', 'error');
+      }
+    } catch (e: any) {
+      toast(e.message || 'An unexpected error occurred', 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -250,7 +262,6 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
                         const parsed = JSON.parse(e.target.value);
                         handleChange(field.name, parsed);
                       } catch (err) {
-                        // Let them type invalid JSON, just save it as string temporarily
                         handleChange(field.name, e.target.value);
                       }
                     }}
@@ -314,13 +325,16 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
                           setLoading(true);
                           const fd = new FormData();
                           fd.append('file', file);
-                          const res = await uploadImageToSanity(fd);
-                          if (res.success) {
-                            const newArray = [...(formData[field.name] || [])];
-                            newArray.push({ ...res.asset, _key: Math.random().toString(36).substring(2, 9) });
-                            handleChange(field.name, newArray);
-                          } else {
-                            alert('Image upload failed');
+                          try {
+                            const res = await uploadImageToSanity(fd);
+                            if (res.success && res.asset) {
+                              const newArray = [...(formData[field.name] || []), { ...res.asset, _key: Math.random().toString(36).substring(2, 9) }];
+                              handleChange(field.name, newArray);
+                            } else {
+                              toast('Image upload failed', 'error');
+                            }
+                          } catch (error) {
+                            toast('Image upload failed', 'error');
                           }
                           setLoading(false);
                         }} 

@@ -1,15 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { Edit2, Trash2, Plus, Download } from 'lucide-react';
 import { SchemaConfig } from '@/lib/schema-config';
 import { CmsFormModal } from './cms-form-modal';
 import { deleteDocument } from '@/app/actions/cms';
+import { useToast } from '@/contexts/ToastContext';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
 
 export function CmsTable({ schema, initialDocs }: { schema: SchemaConfig, initialDocs: any[] }) {
   const [docs, setDocs] = useState(initialDocs);
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [docToDelete, setDocToDelete] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const displayFields = schema.fields.filter(f => !['block', 'image', 'array_string', 'object'].includes(f.type)).slice(0, 4);
 
@@ -23,14 +27,16 @@ export function CmsTable({ schema, initialDocs }: { schema: SchemaConfig, initia
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this document?')) return;
-    const res = await deleteDocument(id);
+  const handleDelete = async () => {
+    if (!docToDelete) return;
+    const res = await deleteDocument(docToDelete);
     if (res.success) {
-      setDocs(docs.filter(d => d._id !== id));
+      setDocs(docs.filter(d => d._id !== docToDelete));
+      toast('Document deleted successfully', 'success');
     } else {
-      alert('Failed to delete document');
+      toast(res.message || 'Failed to delete document', 'error');
     }
+    setDocToDelete(null);
   };
 
   const handleSaved = (savedDoc: any) => {
@@ -41,6 +47,41 @@ export function CmsTable({ schema, initialDocs }: { schema: SchemaConfig, initia
     }
   };
 
+  const handleExport = () => {
+    if (docs.length === 0) {
+      toast("No data to export.", "warning");
+      return;
+    }
+    
+    const exportFields = schema.fields.filter(f => !['block', 'image'].includes(f.type));
+    const headers = exportFields.map(f => `"${f.title.replace(/"/g, '""')}"`).join(',');
+    
+    const rows = docs.map(doc => {
+      return exportFields.map(f => {
+        let val = doc[f.name];
+        if (val === undefined || val === null) return '""';
+        
+        if (f.type === 'reference') val = val._ref;
+        else if (f.type === 'slug') val = val.current;
+        else if (typeof val === 'object') val = JSON.stringify(val);
+        
+        const stringVal = String(val).replace(/"/g, '""');
+        return `"${stringVal}"`;
+      }).join(',');
+    });
+    
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${schema.title.toLowerCase()}s_export.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -48,13 +89,22 @@ export function CmsTable({ schema, initialDocs }: { schema: SchemaConfig, initia
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">{schema.title}s</h1>
           <p className="text-sm text-gray-500 mt-1">Manage all your {schema.title.toLowerCase()} content.</p>
         </div>
-        <button 
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-gray-900 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add {schema.title}
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export All
+          </button>
+          <button 
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-gray-900 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add {schema.title}
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -98,7 +148,7 @@ export function CmsTable({ schema, initialDocs }: { schema: SchemaConfig, initia
                         <button onClick={() => handleEdit(doc)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(doc._id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <button onClick={() => setDocToDelete(doc._id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -117,6 +167,14 @@ export function CmsTable({ schema, initialDocs }: { schema: SchemaConfig, initia
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSaved={handleSaved}
+      />
+      <ConfirmModal 
+        isOpen={!!docToDelete}
+        title="Delete Document"
+        message="Are you sure you want to delete this document? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setDocToDelete(null)}
       />
     </>
   );

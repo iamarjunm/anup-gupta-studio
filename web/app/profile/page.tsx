@@ -10,10 +10,12 @@ import { client } from '@/lib/sanity';
 import { updateUserProfile, updateUserAddresses } from '@/app/actions/profile';
 import { AddressModal, Address } from '@/components/address-modal';
 import { InvoiceTemplate } from '@/components/invoice';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
   
   // State to hold the full Sanity user document
   const [sanityUser, setSanityUser] = useState<any>(null);
@@ -59,8 +61,9 @@ export default function ProfilePage() {
     if (result.success) {
       setSanityUser({ ...sanityUser, addresses: currentAddresses });
       setIsAddressModalOpen(false);
+      toast('Address updated successfully!', 'success');
     } else {
-      alert(result.message);
+      toast(result.message || 'Failed to update address', 'error');
     }
   };
 
@@ -70,8 +73,9 @@ export default function ProfilePage() {
     const result = await updateUserAddresses(user.uid, currentAddresses);
     if (result.success) {
       setSanityUser({ ...sanityUser, addresses: currentAddresses });
+      toast('Address deleted successfully', 'success');
     } else {
-      alert(result.message);
+      toast(result.message || 'Failed to delete address', 'error');
     }
   };
 

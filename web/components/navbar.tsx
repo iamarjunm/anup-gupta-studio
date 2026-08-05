@@ -261,7 +261,6 @@ export function Navbar({ announcements, navigation }: { announcements?: any[], n
                       <Link href="/admin" className="px-4 py-2.5 text-[11px] font-bold tracking-wider uppercase text-blue-600 hover:bg-blue-50 transition-colors">Admin Portal</Link>
                     )}
                     <Link href="/profile" className="px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Profile</Link>
-                    <Link href="/profile" className="px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Track Orders</Link>
                     <button onClick={() => signOut(auth)} className="text-left cursor-pointer px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-red-600 hover:bg-gray-50 transition-colors border-t border-gray-100 mt-1 pt-3.5 w-full">Logout</button>
                   </>
                 ) : (

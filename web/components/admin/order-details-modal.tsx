@@ -2,10 +2,12 @@
 
 import { X, Package, Truck, CheckCircle, Clock } from 'lucide-react';
 import { updateOrderStatus } from '@/app/actions/admin';
+import { useToast } from '@/contexts/ToastContext';
 import { useState } from 'react';
 
 export function OrderDetailsModal({ order, isOpen, onClose, onUpdateStatus }: { order: any, isOpen: boolean, onClose: () => void, onUpdateStatus: (id: string, status: string) => void }) {
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   if (!isOpen || !order) return null;
 
@@ -13,9 +15,10 @@ export function OrderDetailsModal({ order, isOpen, onClose, onUpdateStatus }: { 
     setLoading(true);
     const res = await updateOrderStatus(order._id, newStatus);
     if (res.success) {
+      toast(`Order status updated to ${newStatus}`, 'success');
       onUpdateStatus(order._id, newStatus);
     } else {
-      alert('Failed to update status');
+      toast(res.message || 'Failed to update status', 'error');
     }
     setLoading(false);
   };

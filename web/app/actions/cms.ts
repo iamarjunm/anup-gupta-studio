@@ -40,7 +40,14 @@ export async function deleteDocument(id: string) {
     await writeClient.delete(id);
     return { success: true };
   } catch (error: any) {
-    return { success: false, message: error.message };
+    let message = error.message || 'Failed to delete document';
+    
+    // Check if it's a reference constraint error from Sanity
+    if (message.toLowerCase().includes('referenced by document')) {
+      message = 'Cannot delete because this item is currently being used by another document (like an Order, Collection, or Category). Please remove those connections first.';
+    }
+
+    return { success: false, message };
   }
 }
 

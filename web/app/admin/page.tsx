@@ -1,6 +1,7 @@
 import { getAdminStats, getAdminRecentOrders } from '../actions/admin';
 import { IndianRupee, ShoppingBag, Users, Package } from 'lucide-react';
 import Link from 'next/link';
+import { AdminExportCentre } from '@/components/admin/export-centre';
 
 export default async function AdminDashboard() {
   const [statsRes, recentOrdersRes] = await Promise.all([
@@ -38,6 +39,8 @@ export default async function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      <AdminExportCentre />
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">

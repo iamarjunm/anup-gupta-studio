@@ -114,3 +114,27 @@ export async function updateUserRole(userId: string, isAdmin: boolean) {
     return { success: false, message: error.message };
   }
 }
+
+export async function getExportData() {
+  try {
+    const [orders, users, products, subscribers] = await Promise.all([
+      client.fetch(`*[_type == "order"]`),
+      client.fetch(`*[_type == "user"]`),
+      client.fetch(`*[_type == "product"]`),
+      client.fetch(`*[_type == "newsletterSubscriber"]`),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        orders,
+        users,
+        products,
+        subscribers,
+      },
+    };
+  } catch (error: any) {
+    console.error('Error fetching export data:', error);
+    return { success: false, message: error.message };
+  }
+}

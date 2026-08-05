@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/contexts/ToastContext';
 
 type ProductFormProps = {
   product: {
@@ -16,6 +17,7 @@ type ProductFormProps = {
 };
 
 export function ProductForm({ product, children }: ProductFormProps) {
+  const { toast } = useToast();
   const defaultSize = product.sizes?.find(s => s.stock > 0)?.size || 'Custom Tailored';
   const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [quantity, setQuantity] = useState(1);
@@ -38,7 +40,7 @@ export function ProductForm({ product, children }: ProductFormProps) {
     if (selectedSize === 'Custom Tailored') {
       const missing = Object.entries(measurements).find(([_, val]) => !val.trim());
       if (missing) {
-        alert(`Please enter your measurement for: ${missing[0]}`);
+        toast(`Please enter your measurement for: ${missing[0]}`, 'warning');
         return;
       }
     }

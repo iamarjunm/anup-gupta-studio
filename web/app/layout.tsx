@@ -4,6 +4,7 @@ import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 import { CartSidebar } from '@/components/cart-sidebar';
 import { client } from '@/lib/sanity';
 import { ANNOUNCEMENT_BAR_QUERY, NAVIGATION_QUERY } from '@/lib/queries';
@@ -21,18 +22,20 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   return (
     <html lang="en">
       <body className="antialiased bg-white" suppressHydrationWarning>
-        <AuthProvider>
-          <CartProvider>
-            <div className="print:hidden">
-              <Navbar announcements={announcements} navigation={navigationData} />
-            </div>
-            {children}
-            <div className="print:hidden">
-              <Footer />
-            </div>
-            <CartSidebar />
-          </CartProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <CartProvider>
+              <div className="print:hidden">
+                <Navbar announcements={announcements} navigation={navigationData} />
+              </div>
+              {children}
+              <div className="print:hidden">
+                <Footer />
+              </div>
+              <CartSidebar />
+            </CartProvider>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );
