@@ -4,6 +4,8 @@ import { CmsTable } from '@/components/admin/cms-table';
 import { SiteSettingsEditor } from '@/components/admin/site-settings-editor';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminContentPage({ params }: { params: Promise<{ type: string }> }) {
   const { type } = await params;
   const schema = cmsSchemas.find(s => s.name === type);

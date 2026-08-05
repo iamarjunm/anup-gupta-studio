@@ -81,6 +81,7 @@ function NavItem({ label, href = "#", links, columns, images, rightAlign = false
 export function Navbar({ announcements, navigation }: { announcements?: any[], navigation?: any }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
   const [currentAnnouncementIndex, setCurrentAnnouncementIndex] = useState(0);
   const { user, sanityUser } = useAuth();
   const { cartCount, setIsCartOpen } = useCart();
@@ -246,7 +247,7 @@ export function Navbar({ announcements, navigation }: { announcements?: any[], n
                   <User className="w-[18px] h-[18px]" strokeWidth={2} />
                 </Link>
               ) : (
-                <button suppressHydrationWarning onClick={() => setIsAuthModalOpen(true)} className="text-gray-900 hover:text-gray-500 transition-colors p-1 flex items-center h-full">
+                <button suppressHydrationWarning onClick={() => { setAuthModalMode('login'); setIsAuthModalOpen(true); }} className="text-gray-900 hover:text-gray-500 transition-colors p-1 flex items-center h-full">
                   <User className="w-[18px] h-[18px]" strokeWidth={2} />
                 </button>
               )}
@@ -265,8 +266,8 @@ export function Navbar({ announcements, navigation }: { announcements?: any[], n
                   </>
                 ) : (
                   <>
-                    <button suppressHydrationWarning onClick={() => setIsAuthModalOpen(true)} className="text-left w-full cursor-pointer px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Log In</button>
-                    <button suppressHydrationWarning onClick={() => setIsAuthModalOpen(true)} className="text-left w-full cursor-pointer px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Create Account</button>
+                    <button suppressHydrationWarning onClick={() => { setAuthModalMode('login'); setIsAuthModalOpen(true); }} className="text-left w-full cursor-pointer px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Log In</button>
+                    <button suppressHydrationWarning onClick={() => { setAuthModalMode('signup'); setIsAuthModalOpen(true); }} className="text-left w-full cursor-pointer px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Create Account</button>
                   </>
                 )}
               </div>
@@ -283,7 +284,7 @@ export function Navbar({ announcements, navigation }: { announcements?: any[], n
         </div>
       </header>
 
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} initialMode={authModalMode} />
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
@@ -333,6 +334,10 @@ export function Navbar({ announcements, navigation }: { announcements?: any[], n
               <Link href="/profile" className="flex items-center gap-3 text-sm font-medium text-gray-700" onClick={() => setIsMobileMenuOpen(false)}>
                 <User className="w-5 h-5" strokeWidth={1.5} /> My Account
               </Link>
+              <div className="pt-4 mt-4 border-t border-gray-100 flex flex-col gap-1">
+                <button onClick={() => { setIsMobileMenuOpen(false); setAuthModalMode('login'); setIsAuthModalOpen(true); }} className="text-left w-full px-4 py-3 text-[13px] font-semibold text-gray-900 bg-gray-50 rounded-lg">Log In</button>
+                <button onClick={() => { setIsMobileMenuOpen(false); setAuthModalMode('signup'); setIsAuthModalOpen(true); }} className="text-left w-full px-4 py-3 text-[13px] font-semibold text-white bg-black rounded-lg">Create Account</button>
+              </div>
             </div>
           </div>
         </div>

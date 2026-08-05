@@ -1,6 +1,7 @@
 'use server';
 
 import { client, writeClient } from '@/lib/sanity';
+import { revalidatePath } from 'next/cache';
 
 export async function fetchDocuments(type: string) {
   try {
@@ -18,6 +19,7 @@ export async function createDocument(type: string, data: any) {
       ...data,
     };
     const res = await writeClient.create(doc);
+    revalidatePath('/', 'layout');
     return { success: true, data: res };
   } catch (error: any) {
     console.error('Error creating document:', error);
@@ -28,6 +30,7 @@ export async function createDocument(type: string, data: any) {
 export async function updateDocument(id: string, data: any) {
   try {
     const res = await writeClient.patch(id).set(data).commit();
+    revalidatePath('/', 'layout');
     return { success: true, data: res };
   } catch (error: any) {
     console.error('Error updating document:', error);
@@ -38,6 +41,7 @@ export async function updateDocument(id: string, data: any) {
 export async function deleteDocument(id: string) {
   try {
     await writeClient.delete(id);
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error: any) {
     let message = error.message || 'Failed to delete document';

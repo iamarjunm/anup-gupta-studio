@@ -13,7 +13,7 @@ import { InvoiceTemplate } from '@/components/invoice';
 import { useToast } from '@/contexts/ToastContext';
 
 export default function ProfilePage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   

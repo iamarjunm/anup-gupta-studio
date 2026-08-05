@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, ShoppingCart, Users, Settings, ExternalLink, ChevronDown, ChevronRight, FileText } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Users, Settings, ExternalLink, ChevronDown, ChevronRight, FileText, HelpCircle } from 'lucide-react';
 import { cmsSchemas } from '@/lib/schema-config';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -40,6 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Users', href: '/admin/users', icon: Users },
+    { name: 'Help Center', href: '/admin/help', icon: HelpCircle },
   ];
 
   return (

@@ -1,6 +1,7 @@
 'use server';
 
 import { client, writeClient } from '@/lib/sanity';
+import { revalidatePath } from 'next/cache';
 
 export async function getAdminStats() {
   try {
@@ -79,6 +80,8 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
       .patch(orderId)
       .set({ status: newStatus })
       .commit();
+    revalidatePath('/admin', 'layout');
+    revalidatePath('/profile');
     return { success: true, order: updatedOrder };
   } catch (error: any) {
     return { success: false, message: error.message };
@@ -109,6 +112,7 @@ export async function updateUserRole(userId: string, isAdmin: boolean) {
       .patch(userId)
       .set({ isAdmin })
       .commit();
+    revalidatePath('/admin', 'layout');
     return { success: true, user: updatedUser };
   } catch (error: any) {
     return { success: false, message: error.message };

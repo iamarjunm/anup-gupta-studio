@@ -3,6 +3,8 @@ import { IndianRupee, ShoppingBag, Users, Package } from 'lucide-react';
 import Link from 'next/link';
 import { AdminExportCentre } from '@/components/admin/export-centre';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboard() {
   const [statsRes, recentOrdersRes] = await Promise.all([
     getAdminStats(),
