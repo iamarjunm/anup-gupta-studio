@@ -6,8 +6,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { LayoutDashboard, ShoppingCart, Users, Settings, ExternalLink, ChevronDown, ChevronRight, FileText, HelpCircle } from 'lucide-react';
 import { cmsSchemas } from '@/lib/schema-config';
-import Image from 'next/image';
-import logoImage from '@/assets/ANUP GUPTA LOGO.jpg.jpeg';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, sanityUser, loading } = useAuth();
@@ -49,15 +47,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="h-[calc(100vh-80px)] overflow-hidden bg-gray-50 flex">
       {/* Admin Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col flex-shrink-0">
-        <div className="p-6 border-b border-gray-100 flex flex-col gap-2">
-          <Image 
-            src={logoImage} 
-            alt="Anup Gupta Studio Logo" 
-            width={120} 
-            height={40} 
-            className="h-8 w-auto object-contain"
-          />
-          <h2 className="text-xs font-bold tracking-widest uppercase text-gray-400 mt-2">Admin Portal</h2>
+        <div className="p-6">
+          <h2 className="text-sm font-bold tracking-widest uppercase text-gray-900">Admin Portal</h2>
         </div>
         <nav className="flex-1 overflow-y-auto p-4 space-y-6">
           
