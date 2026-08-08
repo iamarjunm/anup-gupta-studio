@@ -46,10 +46,9 @@ export function Footer() {
           <h4 className="text-[13px] text-gray-900 uppercase">HELP</h4>
           <nav className="flex flex-col gap-4 text-[13px] text-gray-800">
             <Link href="/returns-policy" className="hover:text-black transition-colors inline-block w-fit">Returns Policy</Link>
-            <Link href="/shipping-returns" className="hover:text-black transition-colors inline-block w-fit">Shipping/Returns</Link>
+            <Link href="/shipping-returns" className="hover:text-black transition-colors inline-block w-fit">Shipping</Link>
             <Link href="/privacy-policy" className="hover:text-black transition-colors inline-block w-fit">Privacy Policy</Link>
             <Link href="/terms-conditions" className="hover:text-black transition-colors inline-block w-fit">Terms and Conditions</Link>
-            <Link href="/fit-guide" className="hover:text-black transition-colors inline-block w-fit">Fit Guide</Link>
           </nav>
         </div>
 

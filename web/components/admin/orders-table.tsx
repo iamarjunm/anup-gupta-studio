@@ -24,7 +24,7 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
       return;
     }
     
-    const headers = '"Order Number","Date","Customer Name","Customer Email","Status","Items Count","Total Amount"';
+    const headers = '"Order Number","Date","Customer Name","Customer Email","Status","Items Count","Total Amount","Shipping Address"';
     const rows = orders.map(order => {
       return [
         `"${String(order.orderNumber || order._id).replace(/"/g, '""')}"`,
@@ -33,7 +33,8 @@ export function OrdersTable({ initialOrders }: { initialOrders: any[] }) {
         `"${String(order.customerEmail || '').replace(/"/g, '""')}"`,
         `"${String(order.status || 'Processing').replace(/"/g, '""')}"`,
         `"${order.items?.length || 0}"`,
-        `"${order.total || 0}"`
+        `"${order.total || 0}"`,
+        `"${order.shippingAddress ? `${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postalCode}, ${order.shippingAddress.country}`.replace(/"/g, '""') : 'N/A'}"`
       ].join(',');
     });
     

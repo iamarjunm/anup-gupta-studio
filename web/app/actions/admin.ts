@@ -2,6 +2,7 @@
 
 import { client, writeClient } from '@/lib/sanity';
 import { revalidatePath } from 'next/cache';
+import { sendOrderStatusUpdateEmail } from '@/lib/email';
 
 export async function getAdminStats() {
   try {
@@ -65,7 +66,8 @@ export async function getAdminOrders() {
         total,
         status,
         createdAt,
-        items
+        items,
+        shippingAddress
       }`
     );
     return { success: true, orders };
@@ -82,6 +84,10 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
       .commit();
     revalidatePath('/admin', 'layout');
     revalidatePath('/profile');
+    
+    // Send email asynchronously
+    sendOrderStatusUpdateEmail(updatedOrder, newStatus).catch(console.error);
+
     return { success: true, order: updatedOrder };
   } catch (error: any) {
     return { success: false, message: error.message };
