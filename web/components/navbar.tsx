@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Search, User, ShoppingBag, Menu, X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import logoImage from '@/assets/ANUP GUPTA LOGO.jpg.jpeg';
 import { SearchModal } from './search-modal';
 import { AuthModal } from './auth-modal';
 import { useAuth } from '@/contexts/AuthContext';
@@ -154,12 +155,13 @@ export function Navbar({ announcements, navigation }: { announcements?: any[], n
           </div>
           
           <Link href="/" className="flex flex-col items-center justify-center shrink-0">
-            <svg viewBox="0 0 100 30" className="h-5 w-auto mb-1">
-              <path d="M10,15 C20,5 30,5 50,15 C70,25 80,25 90,15 C80,5 70,5 50,15 C30,25 20,25 10,15 Z" fill="none" stroke="black" strokeWidth="1"/>
-            </svg>
-            <span className="text-[11px] font-serif tracking-[0.1em] uppercase text-black leading-none">
-              Anup Gupta
-            </span>
+            <Image 
+              src={logoImage} 
+              alt="Anup Gupta Studio Logo" 
+              width={120} 
+              height={40} 
+              className="h-8 w-auto object-contain"
+            />
           </Link>
           
           <div className="flex items-center gap-4 justify-end flex-1">
@@ -179,12 +181,13 @@ export function Navbar({ announcements, navigation }: { announcements?: any[], n
         <div className="hidden lg:flex px-8 h-[64px] items-center justify-between max-w-[1800px] mx-auto">
           {/* Logo */}
           <Link href="/" className="flex flex-col shrink-0 w-[200px]">
-            <svg viewBox="0 0 100 30" className="h-7 w-auto mb-1 self-start">
-              <path d="M10,15 C20,5 30,5 50,15 C70,25 80,25 90,15 C80,5 70,5 50,15 C30,25 20,25 10,15 Z" fill="none" stroke="black" strokeWidth="1"/>
-            </svg>
-            <span className="text-[14px] font-serif tracking-[0.1em] uppercase text-black leading-none">
-              Anup Gupta
-            </span>
+            <Image 
+              src={logoImage} 
+              alt="Anup Gupta Studio Logo" 
+              width={160} 
+              height={60} 
+              className="h-12 w-auto object-contain self-start"
+            />
           </Link>
 
           {/* Navigation */}
