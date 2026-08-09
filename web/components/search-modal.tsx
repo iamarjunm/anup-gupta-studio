@@ -83,6 +83,7 @@ export function SearchModal({ triggerClass }: { triggerClass?: string }) {
                     originalPrice={product.compareAtPrice || product.originalPrice}
                     imageUrl={product.imageUrl}
                     hoverImageUrl={product.hoverImageUrl}
+                    galleryUrls={product.galleryUrls}
                     href={`/product/${product.slug || 'sample-product'}`}
                     slug={product.slug}
                     sizes={product.sizes}

@@ -79,8 +79,9 @@ export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) 
             src={product.image}
             alt={product.title}
             fill
-            className="object-cover"
+            className="object-contain"
             referrerPolicy="no-referrer"
+            sizes="(max-width: 640px) 100vw, 45vw"
           />
         </div>
 

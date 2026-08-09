@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, MoveLeft, MoveRight } from 'lucide-react';
 import { useState } from 'react';
 import { QuickAddModal } from './quick-add-modal';
 
@@ -12,6 +12,7 @@ interface ProductCardProps {
   originalPrice?: number;
   imageUrl: string;
   hoverImageUrl?: string;
+  galleryUrls?: string[];
   href: string;
   slug?: string;
   sizes?: { size: string; stock?: number }[];
@@ -19,31 +20,68 @@ interface ProductCardProps {
   styles?: { name: string; price: number }[];
 }
 
-export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageUrl, href, slug, sizes, color, styles }: ProductCardProps) {
+export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageUrl, galleryUrls, href, slug, sizes, color, styles }: ProductCardProps) {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
+
+  const images = [imageUrl, ...(galleryUrls || [])].filter(Boolean);
+  const displayImage = images[currentImageIdx] || imageUrl;
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIdx((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   return (
     <>
       <div className="flex flex-col group">
         <Link href={href} className="relative aspect-[3/4] overflow-hidden mb-3 bg-[#f5f5f5] block">
           <Image
-            src={imageUrl}
+            src={displayImage}
             alt={title}
             fill
-            className={`object-cover transition-opacity duration-700 ${hoverImageUrl ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
+            className={`object-cover transition-all duration-500 group-hover:scale-105`}
             referrerPolicy="no-referrer"
             sizes="(max-width: 768px) 50vw, 20vw"
           />
-          {hoverImageUrl && (
-            <Image
-              src={hoverImageUrl}
-              alt={title}
-              fill
-              className="object-cover transition-opacity duration-700 opacity-0 group-hover:opacity-100 absolute inset-0"
-              referrerPolicy="no-referrer"
-              sizes="(max-width: 768px) 50vw, 20vw"
-            />
+          
+          {/* Hover Arrows */}
+          {images.length > 1 && (
+            <>
+              <button 
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md"
+              >
+                <MoveLeft className="w-8 h-8" strokeWidth={1} />
+              </button>
+              <button 
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md"
+              >
+                <MoveRight className="w-8 h-8" strokeWidth={1} />
+              </button>
+            </>
           )}
+
+          {/* Dots */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              {images.map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentImageIdx ? 'bg-white' : 'bg-white/40'}`}
+                />
+              ))}
+            </div>
+          )}
+
           {originalPrice && (
             <div className="absolute top-3 right-3 bg-[#222] text-white text-[10px] font-medium px-2 py-1 rounded-sm shadow-sm z-10">
               Sale

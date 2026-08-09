@@ -197,6 +197,7 @@ async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ 
                 originalPrice={rp.compareAtPrice}
                 imageUrl={rp.imageUrl}
                 hoverImageUrl={rp.hoverImageUrl}
+                galleryUrls={rp.galleryUrls}
                 href={`/product/${rp.slug}`}
                 slug={rp.slug}
                 sizes={rp.sizes}

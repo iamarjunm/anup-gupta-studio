@@ -102,13 +102,13 @@ export function ProductForm({ product, children }: ProductFormProps) {
       </div>
 
       {/* Size Selector */}
-      <div className="mb-6">
-        <h3 className="text-[13px] text-gray-900 mb-3 tracking-wide">
+      <div className="mb-4">
+        <h3 className="text-[13px] text-gray-900 mb-3">
           Size
         </h3>
         
         {/* Sizes Layout */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2">
           {(product.sizes || []).map((sizeObj: any) => {
             const isOutOfStock = sizeObj.stock === 0;
             return (
@@ -120,7 +120,7 @@ export function ProductForm({ product, children }: ProductFormProps) {
                   setSelectedSize(sizeObj.size);
                   setShowStickyBar(true);
                 }}
-                className={`h-12 min-w-[48px] px-4 border flex flex-col items-center justify-center transition-colors
+                className={`h-10 min-w-[40px] px-3 border flex flex-col items-center justify-center transition-colors
                   ${isOutOfStock ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed' :
                     selectedSize === sizeObj.size ? 'bg-black text-white border-black cursor-pointer' : 'bg-white text-gray-900 border-gray-200 hover:border-black cursor-pointer'}`}
               >
@@ -136,7 +136,7 @@ export function ProductForm({ product, children }: ProductFormProps) {
               setSelectedSize('Custom Tailored');
               setShowStickyBar(true);
             }}
-            className={`h-12 px-6 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
+            className={`h-10 px-5 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
               ${selectedSize === 'Custom Tailored' ? 'bg-black text-white border-black' : 'bg-white text-gray-900 border-gray-200 hover:border-black'}`}
           >
             Custom Tailored
@@ -170,11 +170,11 @@ export function ProductForm({ product, children }: ProductFormProps) {
 
       {/* Color Display */}
       {product.color && (
-        <div className="mb-6">
-          <h3 className="text-[13px] text-gray-900 mb-3 tracking-wide">
+        <div className="mb-4">
+          <h3 className="text-[13px] text-gray-900 mb-3">
             Color
           </h3>
-          <div className="inline-flex h-12 px-6 items-center justify-center bg-black text-white text-[13px]">
+          <div className="inline-flex h-10 px-5 items-center justify-center bg-black text-white text-[13px]">
             {product.color}
           </div>
         </div>
@@ -182,8 +182,8 @@ export function ProductForm({ product, children }: ProductFormProps) {
 
       {/* Style Selector */}
       {product.styles && product.styles.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-[13px] text-gray-900 mb-3 tracking-wide">
+        <div className="mb-4">
+          <h3 className="text-[13px] text-gray-900 mb-3">
             Style
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -192,7 +192,7 @@ export function ProductForm({ product, children }: ProductFormProps) {
                 key={style.name}
                 suppressHydrationWarning
                 onClick={() => setSelectedStyle(style)}
-                className={`h-12 px-6 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
+                className={`h-10 px-5 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
                   ${selectedStyle?.name === style.name ? 'bg-black text-white border-black' : 'bg-white text-gray-900 border-gray-200 hover:border-black'}`}
               >
                 {style.name}

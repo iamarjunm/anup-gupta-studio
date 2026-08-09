@@ -54,6 +54,7 @@ const mapProduct = (product: any) => ({
   originalPrice: product.compareAtPrice || product.originalPrice,
   imageUrl: product.imageUrl || (product.seed ? `https://picsum.photos/seed/${product.seed}/600/800` : undefined),
   hoverImageUrl: product.hoverImageUrl || (product.seed ? `https://picsum.photos/seed/${product.seed}_hover/600/800` : undefined),
+  galleryUrls: product.galleryUrls,
   href: `/product/${product.slug || 'sample-product'}`,
   slug: product.slug,
   sizes: product.sizes,

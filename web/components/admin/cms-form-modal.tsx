@@ -14,7 +14,19 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
 
   useEffect(() => {
     if (isOpen) {
-      setFormData(doc || {});
+      if (doc) {
+        setFormData(doc);
+      } else {
+        const defaults: any = {};
+        if (schema.name === 'product') {
+          defaults.sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL'].map(s => ({
+            size: s,
+            stock: 10,
+            _key: Math.random().toString(36).substring(2, 9)
+          }));
+        }
+        setFormData(defaults);
+      }
       // Fetch references for reference fields
       schema.fields.filter(f => f.type === 'reference').forEach(async (f) => {
         if (f.referenceTo) {
@@ -299,6 +311,41 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
                             className="w-full h-full object-cover" 
                           />
                         )}
+                        <div className="absolute bottom-2 left-2 right-2 flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (index > 0) {
+                                const newArray = [...(formData[field.name] || [])];
+                                const temp = newArray[index - 1];
+                                newArray[index - 1] = newArray[index];
+                                newArray[index] = temp;
+                                handleChange(field.name, newArray);
+                              }
+                            }}
+                            className={`p-1 bg-white rounded shadow-sm hover:bg-gray-100 text-gray-700 ${index === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={index === 0}
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m15 18-6-6 6-6"/></svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const arr = formData[field.name] || [];
+                              if (index < arr.length - 1) {
+                                const newArray = [...arr];
+                                const temp = newArray[index + 1];
+                                newArray[index + 1] = newArray[index];
+                                newArray[index] = temp;
+                                handleChange(field.name, newArray);
+                              }
+                            }}
+                            className={`p-1 bg-white rounded shadow-sm hover:bg-gray-100 text-gray-700 ${index === (formData[field.name] || []).length - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={index === (formData[field.name] || []).length - 1}
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
+                          </button>
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
@@ -318,20 +365,32 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
                       <input 
                         type="file" 
                         accept="image/*" 
+                        multiple
                         className="hidden" 
                         onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
+                          const files = e.target.files;
+                          if (!files || files.length === 0) return;
                           setLoading(true);
-                          const fd = new FormData();
-                          fd.append('file', file);
-                          try {
+                          
+                          const uploadPromises = Array.from(files).map(async (file) => {
+                            const fd = new FormData();
+                            fd.append('file', file);
                             const res = await uploadImageToSanity(fd);
                             if (res.success && res.asset) {
-                              const newArray = [...(formData[field.name] || []), { ...res.asset, _key: Math.random().toString(36).substring(2, 9) }];
+                              return { ...res.asset, _key: Math.random().toString(36).substring(2, 9) };
+                            }
+                            return null;
+                          });
+
+                          try {
+                            const results = await Promise.all(uploadPromises);
+                            const successfulUploads = results.filter(Boolean);
+                            if (successfulUploads.length > 0) {
+                              const newArray = [...(formData[field.name] || []), ...successfulUploads];
                               handleChange(field.name, newArray);
-                            } else {
-                              toast('Image upload failed', 'error');
+                            }
+                            if (successfulUploads.length < files.length) {
+                              toast('Some images failed to upload', 'error');
                             }
                           } catch (error) {
                             toast('Image upload failed', 'error');

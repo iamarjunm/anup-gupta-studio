@@ -56,6 +56,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
                   fill 
                   className="object-cover" 
                   referrerPolicy="no-referrer"
+                  sizes="(max-width: 768px) 25vw, 10vw"
                 />
               </button>
             ))}
@@ -74,6 +75,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
                   fill
                   className="object-cover"
                   referrerPolicy="no-referrer"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   priority
                 />
                 
@@ -134,6 +136,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
                   fill
                   className="object-contain"
                   referrerPolicy="no-referrer"
+                  sizes="100vw"
                 />
              </div>
              
@@ -170,6 +173,7 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
                   fill 
                   className="object-cover" 
                   referrerPolicy="no-referrer"
+                  sizes="(max-width: 768px) 25vw, 10vw"
                 />
               </button>
             ))}
