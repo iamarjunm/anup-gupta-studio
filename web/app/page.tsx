@@ -56,7 +56,9 @@ const mapProduct = (product: any) => ({
   hoverImageUrl: product.hoverImageUrl || (product.seed ? `https://picsum.photos/seed/${product.seed}_hover/600/800` : undefined),
   href: `/product/${product.slug || 'sample-product'}`,
   slug: product.slug,
-  sizes: product.sizes
+  sizes: product.sizes,
+  color: product.color,
+  styles: product.styles
 });
 
 function HomeLoader() {

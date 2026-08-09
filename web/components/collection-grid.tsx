@@ -44,6 +44,8 @@ export function CollectionGrid({ products, highestPrice = 0 }: { products: any[]
                 href={`/product/${product.slug || 'sample-product'}`}
                 slug={product.slug}
                 sizes={product.sizes}
+                color={product.color}
+                styles={product.styles}
               />
             </div>
           ))}

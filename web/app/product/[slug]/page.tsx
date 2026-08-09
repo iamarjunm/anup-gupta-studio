@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Share2, Plus, Minus, ExternalLink } from 'lucide-react';
 import { ProductAccordion } from '@/components/product-accordion';
 import { ProductForm } from '@/components/product-form';
+import { ShareButton } from '@/components/share-button';
 import { client } from '@/lib/sanity';
 import { PRODUCT_BY_SLUG_QUERY, GLOBAL_SETTINGS_QUERY, RELATED_PRODUCTS_QUERY, FALLBACK_PRODUCTS_QUERY } from '@/lib/queries';
 import { RichText } from '@/components/rich-text';
@@ -177,9 +178,7 @@ async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ 
           />
 
           {/* Share */}
-          <button suppressHydrationWarning className="flex items-center gap-2 text-sm font-semibold tracking-wider uppercase mt-6 hover:text-gray-600 transition-colors cursor-pointer w-fit">
-            <Share2 className="w-4 h-4" /> SHARE
-          </button>
+          <ShareButton />
         </div>
       </div>
 
@@ -201,6 +200,8 @@ async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ 
                 href={`/product/${rp.slug}`}
                 slug={rp.slug}
                 sizes={rp.sizes}
+                color={rp.color}
+                styles={rp.styles}
               />
             ))}
           </div>
