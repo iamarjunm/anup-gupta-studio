@@ -271,7 +271,8 @@ export default function ProfilePage() {
             <>
               {selectedOrder ? (
                 <div>
-                  <div className="flex justify-between items-center mb-6">
+                  <div className="print:hidden">
+                    <div className="flex justify-between items-center mb-6">
                     <button 
                       onClick={() => setSelectedOrder(null)}
                       className="text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-900 flex items-center gap-2"
@@ -319,7 +320,21 @@ export default function ProfilePage() {
                           <div key={item._key} className="flex justify-between items-center p-4 border border-gray-100 bg-gray-50/50">
                             <div>
                               <p className="font-medium text-gray-900">{item.productTitle}</p>
-                              <p className="text-gray-500 text-xs mt-1">Size: {item.variantSize} | Color: {item.variantColor} | Qty: {item.quantity}</p>
+                              <p className="text-gray-500 text-xs mt-1">
+                                Size: {item.variantSize} 
+                                {item.variantColor && ` | Color: ${item.variantColor}`} 
+                                | Qty: {item.quantity}
+                              </p>
+                              {item.measurements && (Array.isArray(item.measurements) ? item.measurements.length > 0 : Object.keys(item.measurements).length > 0) && (
+                                <div className="mt-2 text-[10px] text-gray-500 bg-gray-50 p-2 rounded border border-gray-100 grid grid-cols-2 gap-x-2">
+                                  {(Array.isArray(item.measurements) ? item.measurements : Object.entries(item.measurements).map(([k,v]) => ({key: k, value: v}))).map((m: any) => (
+                                    <div key={m.key}>
+                                      <span>{m.key}: </span>
+                                      <span className="font-medium text-gray-900">{String(m.value)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                             <p className="font-medium text-gray-900">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</p>
                           </div>
@@ -340,6 +355,7 @@ export default function ProfilePage() {
                         <span>Total Paid</span>
                         <span>Rs. {selectedOrder.total.toLocaleString('en-IN')}</span>
                       </div>
+                    </div>
                     </div>
                   </div>
                   
@@ -395,7 +411,21 @@ export default function ProfilePage() {
                                 <div className="flex gap-4 items-center">
                                   <div>
                                     <p className="font-medium text-gray-900">{item.productTitle}</p>
-                                    <p className="text-gray-500 text-xs mt-0.5">Size: {item.variantSize} | Qty: {item.quantity}</p>
+                                    <p className="text-gray-500 text-xs mt-0.5">
+                                      Size: {item.variantSize} 
+                                      {item.variantColor && ` | Color: ${item.variantColor}`} 
+                                      | Qty: {item.quantity}
+                                    </p>
+                                    {item.measurements && (Array.isArray(item.measurements) ? item.measurements.length > 0 : Object.keys(item.measurements).length > 0) && (
+                                      <div className="mt-2 text-[10px] text-gray-500 bg-gray-50 p-2 rounded grid grid-cols-2 gap-x-2">
+                                        {(Array.isArray(item.measurements) ? item.measurements : Object.entries(item.measurements).map(([k,v]) => ({key: k, value: v}))).map((m: any) => (
+                                          <div key={m.key}>
+                                            <span>{m.key}: </span>
+                                            <span className="font-medium text-gray-900">{String(m.value)}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                                 <p className="font-medium text-gray-900">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</p>

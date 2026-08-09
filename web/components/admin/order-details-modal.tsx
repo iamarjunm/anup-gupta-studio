@@ -105,6 +105,19 @@ export function OrderDetailsModal({ order, isOpen, onClose, onUpdateStatus }: { 
                       {item.variantColor && ` | Color: ${item.variantColor}`}
                       {item.variantStyle && ` | Style: ${item.variantStyle}`}
                     </p>
+                    {item.measurements && (Array.isArray(item.measurements) ? item.measurements.length > 0 : Object.keys(item.measurements).length > 0) && (
+                      <div className="mt-3 text-xs bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <p className="font-semibold text-gray-700 mb-2">Custom Measurements:</p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                          {(Array.isArray(item.measurements) ? item.measurements : Object.entries(item.measurements).map(([k,v]) => ({key: k, value: v}))).map((m: any) => (
+                            <div key={m.key} className="flex justify-between text-gray-600">
+                              <span>{m.key}:</span>
+                              <span className="font-medium text-gray-900">{String(m.value)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-900">₹{item.price?.toLocaleString('en-IN')}</p>

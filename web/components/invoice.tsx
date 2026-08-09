@@ -8,7 +8,7 @@ export function InvoiceTemplate({ order }: { order: any }) {
     : Math.max(0, (order.subtotal || order.total) + (order.shippingCost || 0) - order.total);
 
   return (
-    <div className="hidden print:block absolute top-0 left-0 w-full bg-white text-black p-8 z-[99999] min-h-screen font-sans">
+    <div className="hidden print:block absolute top-0 left-0 w-full bg-white text-black p-8 z-[99999] font-sans">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-start border-b border-gray-200 pb-8 mb-8">
           <div>
@@ -91,7 +91,7 @@ export function InvoiceTemplate({ order }: { order: any }) {
           </div>
         </div>
 
-        <div className="mt-20 pt-8 border-t border-gray-200 text-center text-xs text-gray-400">
+        <div className="mt-12 pt-8 border-t border-gray-200 text-center text-xs text-gray-400">
           <p>This is a computer generated invoice and does not require a physical signature.</p>
           <p className="mt-1">Thank you for shopping with Anup Gupta Studio!</p>
         </div>

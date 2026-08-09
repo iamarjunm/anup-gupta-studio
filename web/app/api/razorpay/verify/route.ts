@@ -52,6 +52,11 @@ export async function POST(request: Request) {
       variantSize: item.size,
       variantColor: item.color || '',
       variantStyle: item.style || '',
+      measurements: item.measurements ? Object.entries(item.measurements).map(([k, v]) => ({
+        _key: Math.random().toString(36).substring(7),
+        key: k,
+        value: String(v)
+      })) : undefined,
     }));
 
     // Calculate discount
@@ -117,8 +122,8 @@ export async function POST(request: Request) {
 
     await Promise.all(operations);
 
-    // Send confirmation email asynchronously (don't await it so we don't block the checkout response)
-    sendOrderConfirmationEmail(orderDataForEmail).catch(console.error);
+    // Send confirmation email
+    await sendOrderConfirmationEmail(orderDataForEmail).catch(console.error);
 
     return NextResponse.json({ success: true, message: 'Payment verified successfully', orderNumber });
   } catch (error: any) {

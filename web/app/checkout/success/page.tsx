@@ -27,7 +27,8 @@ function SuccessContent() {
   }, [orderId]);
 
   return (
-    <div className="min-h-[70vh] flex flex-col items-center px-4 py-16 lg:py-24 bg-[#f8f8f8]">
+    <>
+      <div className="print:hidden min-h-[70vh] flex flex-col items-center px-4 py-16 lg:py-24 bg-[#f8f8f8]">
       <div className="max-w-3xl w-full">
         {/* Header Section */}
         <div className="bg-white p-8 lg:p-12 border border-gray-100 shadow-sm text-center mb-8">
@@ -94,7 +95,21 @@ function SuccessContent() {
                   <div key={item._key} className="flex justify-between items-center p-4 border border-gray-100 bg-gray-50/50">
                     <div>
                       <p className="font-semibold text-gray-900">{item.productTitle}</p>
-                      <p className="text-gray-500 text-xs mt-1">Size: {item.variantSize} | Color: {item.variantColor} | Qty: {item.quantity}</p>
+                      <p className="text-gray-500 text-xs mt-1">
+                        Size: {item.variantSize} 
+                        {item.variantColor && ` | Color: ${item.variantColor}`} 
+                        | Qty: {item.quantity}
+                      </p>
+                      {item.measurements && (Array.isArray(item.measurements) ? item.measurements.length > 0 : Object.keys(item.measurements).length > 0) && (
+                        <div className="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded border border-gray-100 grid grid-cols-2 gap-x-2 gap-y-1">
+                          {(Array.isArray(item.measurements) ? item.measurements : Object.entries(item.measurements).map(([k,v]) => ({key: k, value: v}))).map((m: any) => (
+                            <div key={m.key}>
+                              <span>{m.key}: </span>
+                              <span className="font-medium text-gray-900">{String(m.value)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <p className="font-medium text-gray-900">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</p>
                   </div>
@@ -133,9 +148,10 @@ function SuccessContent() {
           </div>
         )}
       </div>
+      </div>
       
       <InvoiceTemplate order={order} />
-    </div>
+    </>
   );
 }
 

@@ -51,6 +51,20 @@ export default defineType({
             { name: 'variantSize', type: 'string', title: 'Variant Size' },
             { name: 'variantColor', type: 'string', title: 'Variant Color' },
             { name: 'variantStyle', type: 'string', title: 'Variant Style' },
+            {
+              name: 'measurements',
+              title: 'Custom Measurements',
+              type: 'array',
+              of: [
+                {
+                  type: 'object',
+                  fields: [
+                    { name: 'key', type: 'string', title: 'Measurement Name' },
+                    { name: 'value', type: 'string', title: 'Value' }
+                  ]
+                }
+              ]
+            }
           ],
         },
       ],
