@@ -110,10 +110,10 @@ async function CollectionPageContent({ paramsPromise, searchParamsPromise }: { p
   return (
     <>
       <div className="mb-12">
-        <h1 className="text-2xl md:text-3xl font-semibold uppercase tracking-wide text-gray-900 mb-4">
+        <h1 className="text-xl md:text-2xl font-semibold uppercase text-gray-900 mb-3 text-pretty w-fit tracking-wide">
           {title}
         </h1>
-        <div className="text-sm text-gray-900 font-medium">
+        <div className="text-sm text-gray-700 w-fit mt-1">
           {description}
         </div>
       </div>

@@ -50,6 +50,7 @@ export default defineType({
             { name: 'price', type: 'number', title: 'Price' },
             { name: 'variantSize', type: 'string', title: 'Variant Size' },
             { name: 'variantColor', type: 'string', title: 'Variant Color' },
+            { name: 'variantStyle', type: 'string', title: 'Variant Style' },
           ],
         },
       ],

@@ -13,19 +13,37 @@ interface QuickAddModalProps {
     image: string;
     slug: string;
     sizes?: { size: string; stock?: number }[];
+    color?: string;
+    styles?: { name: string; price: number }[];
   };
 }
 
 import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/contexts/ToastContext';
 
 const DEFAULT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL', 'Custom Tailored'];
 
 export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) {
   const { addItem } = useCart();
+  const { toast } = useToast();
   const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes.map(s => s.size) : DEFAULT_SIZES;
   
   const [selectedSize, setSelectedSize] = useState(availableSizes[0] || 'XS');
   const [quantity, setQuantity] = useState(1);
+  const defaultStyle = product.styles && product.styles.length > 0 ? product.styles[0] : undefined;
+  const [selectedStyle, setSelectedStyle] = useState(defaultStyle);
+  const [measurements, setMeasurements] = useState<Record<string, string>>({
+    'Chest': '',
+    'Waist': '',
+    'Hips': '',
+    'Sleeve Length': '',
+    'Neck': '',
+    'Stomach': '',
+    'Shoulder': '',
+    'Shirt Length': ''
+  });
+
+  const displayPrice = selectedStyle?.price || product.price;
 
   useEffect(() => {
     if (isOpen) {
@@ -70,7 +88,7 @@ export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) 
         <div className="flex-1 overflow-y-auto p-6 md:p-10">
           <h2 className="text-2xl font-bold text-gray-900 mb-2 pr-8">{product.title}</h2>
           <p className="text-gray-900 font-medium mb-8">
-            Rs.{product.price.toLocaleString('en-IN')}.00
+            Rs.{displayPrice.toLocaleString('en-IN')}.00
           </p>
 
           <div className="space-y-6">
@@ -78,21 +96,95 @@ export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) 
             <div>
               <p className="text-sm font-medium text-gray-900 mb-3">Size</p>
               <div className="flex flex-wrap gap-2">
-                {availableSizes.map((size) => (
+                {(product.sizes && product.sizes.length > 0 ? product.sizes : DEFAULT_SIZES.map(s => ({ size: s, stock: 1 }))).map((sizeObj: any) => {
+                  const isOutOfStock = sizeObj.stock === 0;
+                  return (
+                    <button
+                      key={sizeObj.size}
+                      disabled={isOutOfStock}
+                      onClick={() => setSelectedSize(sizeObj.size)}
+                      className={`px-4 py-2 text-sm border transition-colors ${
+                        isOutOfStock ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed line-through' :
+                        selectedSize === sizeObj.size
+                          ? 'bg-black text-white border-black cursor-pointer'
+                          : 'border-gray-200 text-gray-700 hover:border-gray-900 cursor-pointer'
+                      }`}
+                    >
+                      {sizeObj.size}
+                    </button>
+                  );
+                })}
+                {/* Custom Tailored Button */}
+                {(!product.sizes || !product.sizes.some(s => s.size === 'Custom Tailored')) && (
                   <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`px-4 py-2 text-sm border transition-colors ${
-                      selectedSize === size
+                    onClick={() => setSelectedSize('Custom Tailored')}
+                    className={`px-4 py-2 text-sm border transition-colors cursor-pointer ${
+                      selectedSize === 'Custom Tailored'
                         ? 'bg-black text-white border-black'
                         : 'border-gray-200 text-gray-700 hover:border-gray-900'
                     }`}
                   >
-                    {size}
+                    Custom Tailored
                   </button>
-                ))}
+                )}
               </div>
             </div>
+
+            {/* Custom Measurements Form */}
+            {selectedSize === 'Custom Tailored' && (
+              <div className="mt-6 p-5 bg-[#fcfcfc] border border-gray-200">
+                <h4 className="text-[13px] font-semibold tracking-wide text-gray-900 mb-4">Enter Your Measurements (inches/cm)</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.keys(measurements).map(field => (
+                    <div key={field} className="flex flex-col">
+                      <label className="text-[11px] text-gray-600 mb-1">{field}</label>
+                      <input 
+                        type="text"
+                        placeholder="e.g., 38"
+                        value={measurements[field]}
+                        onChange={(e) => setMeasurements({...measurements, [field]: e.target.value})}
+                        className="h-10 px-3 border border-gray-200 text-[13px] focus:outline-none focus:border-black transition-colors"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-gray-500 mt-4 leading-relaxed">
+                  * Please ensure measurements are accurate. Custom tailored pieces cannot be returned.
+                </p>
+              </div>
+            )}
+
+            {/* Color Display */}
+            {product.color && (
+              <div>
+                <p className="text-sm font-medium text-gray-900 mb-3">Color</p>
+                <div className="inline-flex h-10 px-4 items-center justify-center bg-black text-white text-sm">
+                  {product.color}
+                </div>
+              </div>
+            )}
+
+            {/* Style Selector */}
+            {product.styles && product.styles.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-gray-900 mb-3">Style</p>
+                <div className="flex flex-wrap gap-2">
+                  {product.styles.map((style) => (
+                    <button
+                      key={style.name}
+                      onClick={() => setSelectedStyle(style)}
+                      className={`px-4 py-2 text-sm border transition-colors ${
+                        selectedStyle?.name === style.name
+                          ? 'bg-black text-white border-black'
+                          : 'border-gray-200 text-gray-700 hover:border-gray-900'
+                      }`}
+                    >
+                      {style.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Add to Cart Actions */}
@@ -117,13 +209,24 @@ export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) 
               className="flex-1 bg-black text-white h-12 flex items-center justify-center gap-2 font-semibold text-sm hover:bg-gray-900 transition-colors disabled:opacity-50"
               disabled={!selectedSize}
               onClick={() => {
+                if (selectedSize === 'Custom Tailored') {
+                  const missing = Object.entries(measurements).find(([_, val]) => !val.trim());
+                  if (missing) {
+                    toast(`Please enter your measurement for: ${missing[0]}`, 'warning');
+                    return;
+                  }
+                }
+                
                 addItem({
                   slug: product.slug,
                   title: product.title,
-                  price: product.price,
+                  price: displayPrice,
                   image: product.image,
                   size: selectedSize,
-                  quantity: quantity
+                  quantity: quantity,
+                  color: product.color,
+                  style: selectedStyle?.name,
+                  ...(selectedSize === 'Custom Tailored' && { measurements })
                 });
                 onClose();
               }}

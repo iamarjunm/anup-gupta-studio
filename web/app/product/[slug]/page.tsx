@@ -5,7 +5,7 @@ import { Share2, Plus, Minus, ExternalLink } from 'lucide-react';
 import { ProductAccordion } from '@/components/product-accordion';
 import { ProductForm } from '@/components/product-form';
 import { client } from '@/lib/sanity';
-import { PRODUCT_BY_SLUG_QUERY, GLOBAL_SETTINGS_QUERY, RELATED_PRODUCTS_QUERY } from '@/lib/queries';
+import { PRODUCT_BY_SLUG_QUERY, GLOBAL_SETTINGS_QUERY, RELATED_PRODUCTS_QUERY, FALLBACK_PRODUCTS_QUERY } from '@/lib/queries';
 import { RichText } from '@/components/rich-text';
 import { ProductGallery } from '@/components/product-gallery';
 import { SizeChartModal } from '@/components/size-chart-modal';
@@ -102,6 +102,12 @@ async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ 
         subcategorySlugs
       });
     }
+
+    if (!relatedProducts || relatedProducts.length === 0) {
+      relatedProducts = await client.fetch(FALLBACK_PRODUCTS_QUERY, {
+        slug: product.slug
+      });
+    }
   }
 
   // Filter out any null/undefined images from the array just in case
@@ -119,28 +125,20 @@ async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ 
 
         {/* Right Side - Details */}
         <div className="lg:col-span-5 xl:col-span-5 flex flex-col pt-4 lg:sticky lg:top-24 min-w-0">
-          <h1 className="text-[15px] md:text-base tracking-[0.05em] uppercase text-gray-900 mb-5">
+          <h1 className="text-lg font-medium uppercase text-gray-900 mb-5 text-pretty text-left w-full">
             {product.title}
           </h1>
-          <div className="flex items-center gap-3 mb-8">
-            <p className="text-gray-500 text-[13px] tracking-wide">
-              Rs. {product.price?.toLocaleString('en-IN')}.00
-            </p>
-            {product.compareAtPrice && (
-              <p className="text-gray-400 line-through text-[13px] tracking-wide">
-                Rs. {product.compareAtPrice.toLocaleString('en-IN')}.00
-              </p>
-            )}
-          </div>
-
           {/* Interactive Form */}
           <ProductForm 
             product={{
               slug: product.slug,
               title: product.title,
               price: product.price,
+              compareAtPrice: product.compareAtPrice,
               image: mainImage || '',
-              sizes: product.sizes
+              sizes: product.sizes,
+              color: product.color,
+              styles: product.styles
             }}
           >
 
@@ -187,9 +185,9 @@ async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ 
 
       {/* Related Products */}
       {relatedProducts && relatedProducts.length > 0 && (
-        <div className="mt-20 pt-16 border-t border-gray-100">
-          <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-widest text-gray-900 mb-10 text-center">
-            Products You May Like
+        <div className="mt-20 pt-16">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-gray-900 mb-8 text-left">
+            You May Also Like
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {relatedProducts.map((rp: any) => (

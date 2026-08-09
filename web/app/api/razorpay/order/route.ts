@@ -13,7 +13,8 @@ export async function POST(request: Request) {
     const slugs = items.map((item: any) => item.slug);
     const productQuery = `*[_type == "product" && slug.current in $slugs] {
       "slug": slug.current,
-      price
+      price,
+      styles
     }`;
     const dcQuery = `*[_type == "discountCode" && code == $code && isActive == true][0]`;
     
@@ -26,7 +27,14 @@ export async function POST(request: Request) {
     for (const item of items) {
       const product = products.find((p: any) => p.slug === item.slug);
       if (product) {
-        subtotal += product.price * item.quantity;
+        let itemPrice = product.price;
+        if (item.style && product.styles) {
+          const matchedStyle = product.styles.find((s: any) => s.name === item.style);
+          if (matchedStyle && matchedStyle.price) {
+            itemPrice = matchedStyle.price;
+          }
+        }
+        subtotal += itemPrice * item.quantity;
       } else {
         return NextResponse.json({ error: `Product not found: ${item.slug}` }, { status: 400 });
       }

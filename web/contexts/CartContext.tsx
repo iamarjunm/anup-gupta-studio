@@ -10,6 +10,8 @@ export type CartItem = {
   image: string;
   size: string;
   quantity: number;
+  color?: string;
+  style?: string;
   measurements?: Record<string, string>;
 };
 
@@ -65,7 +67,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         ? Object.entries(newItem.measurements).sort().map(([k,v]) => `${k}:${v}`).join('|')
         : '';
         
-      const id = measurementsStr ? `${newItem.slug}-${newItem.size}-${measurementsStr}` : `${newItem.slug}-${newItem.size}`;
+      const idBase = `${newItem.slug}-${newItem.size}${newItem.style ? `-${newItem.style}` : ''}${newItem.color ? `-${newItem.color}` : ''}`;
+      const id = measurementsStr ? `${idBase}-${measurementsStr}` : idBase;
       const existingItem = current.find(item => item.id === id);
       
       if (existingItem) {

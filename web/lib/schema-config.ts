@@ -1,4 +1,4 @@
-export type FieldType = 'string' | 'text' | 'number' | 'boolean' | 'image' | 'block' | 'reference' | 'slug' | 'array_string' | 'datetime' | 'object' | 'sizes_array' | 'image_array';
+export type FieldType = 'string' | 'text' | 'number' | 'boolean' | 'image' | 'block' | 'reference' | 'slug' | 'array_string' | 'datetime' | 'object' | 'sizes_array' | 'styles_array' | 'image_array';
 
 export interface FieldConfig {
   name: string;
@@ -63,6 +63,8 @@ export const cmsSchemas: SchemaConfig[] = [
       { name: 'subcategories', title: 'Subcategories', type: 'reference', referenceTo: 'subcategory' },
       { name: 'collections', title: 'Collections', type: 'reference', referenceTo: 'collection' },
       { name: 'sizes', title: 'Sizes & Stock', type: 'sizes_array' },
+      { name: 'color', title: 'Color', type: 'string' },
+      { name: 'styles', title: 'Styles & Pricing', type: 'styles_array' },
       { name: 'newArrival', title: 'New Arrival', type: 'boolean' },
       { name: 'bestseller', title: 'Bestseller', type: 'boolean' },
       { name: 'featured', title: 'Featured', type: 'boolean' },

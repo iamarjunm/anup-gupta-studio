@@ -5,7 +5,9 @@ export const SEARCH_PRODUCTS_QUERY = `*[_type == "product" && (title match $quer
   "slug": slug.current,
   "imageUrl": mainImage.asset->url,
   "hoverImageUrl": gallery[0].asset->url,
-  sizes
+  sizes,
+  color,
+  styles
 }`;
 
 export const NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true][0...5] {
@@ -15,7 +17,9 @@ export const NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true][0
   "slug": slug.current,
   "imageUrl": mainImage.asset->url,
   "hoverImageUrl": gallery[0].asset->url,
-  sizes
+  sizes,
+  color,
+  styles
 }`;
 
 export const BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true][0...5] {
@@ -25,7 +29,9 @@ export const BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true][0.
   "slug": slug.current,
   "imageUrl": mainImage.asset->url,
   "hoverImageUrl": gallery[0].asset->url,
-  sizes
+  sizes,
+  color,
+  styles
 }`;
 
 export const FEATURED_SECTIONS_QUERY = `*[(_type == "category" || _type == "subcategory") && (featuredOnHome == true || displayOnHome == true)] | order(order asc) {
@@ -38,7 +44,9 @@ export const FEATURED_SECTIONS_QUERY = `*[(_type == "category" || _type == "subc
     "slug": slug.current,
     "imageUrl": mainImage.asset->url,
     "hoverImageUrl": gallery[0].asset->url,
-    sizes
+    sizes,
+    color,
+    styles
   }
 }`;
 
@@ -57,6 +65,8 @@ export const PRODUCT_BY_SLUG_QUERY = `*[_type == "product" && slug.current == $s
   "galleryUrls": gallery[].asset->url,
   description,
   sizes,
+  color,
+  styles,
   fabric,
   lookAfterMe,
   "sizeChartRaw": coalesce((categories[]->sizeChartRaw)[@ != null && @ != ""][0], (subcategories[]->sizeChartRaw)[@ != null && @ != ""][0]),
@@ -120,7 +130,9 @@ export const PRODUCTS_BY_COLLECTION_QUERY = `*[_type == "product" && (
   newArrival,
   bestseller,
   _createdAt,
-  sizes
+  sizes,
+  color,
+  styles
 }`;
 
 export const ALL_PRODUCTS_QUERY = `*[_type == "product"] {
@@ -133,7 +145,9 @@ export const ALL_PRODUCTS_QUERY = `*[_type == "product"] {
   newArrival,
   bestseller,
   _createdAt,
-  sizes
+  sizes,
+  color,
+  styles
 }`;
 
 export const ALL_NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true] {
@@ -146,7 +160,9 @@ export const ALL_NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == tru
   newArrival,
   bestseller,
   _createdAt,
-  sizes
+  sizes,
+  color,
+  styles
 }`;
 
 export const ALL_BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true] {
@@ -159,7 +175,9 @@ export const ALL_BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true
   newArrival,
   bestseller,
   _createdAt,
-  sizes
+  sizes,
+  color,
+  styles
 }`;
 
 export const NAVIGATION_QUERY = `{
@@ -193,5 +211,21 @@ export const RELATED_PRODUCTS_QUERY = `*[_type == "product" && slug.current != $
   "hoverImageUrl": gallery[0].asset->url,
   bestseller,
   newArrival,
-  sizes
+  sizes,
+  color,
+  styles
+}`;
+
+export const FALLBACK_PRODUCTS_QUERY = `*[_type == "product" && slug.current != $slug] | order(_createdAt desc) [0...4] {
+  title,
+  price,
+  compareAtPrice,
+  "slug": slug.current,
+  "imageUrl": mainImage.asset->url,
+  "hoverImageUrl": gallery[0].asset->url,
+  bestseller,
+  newArrival,
+  sizes,
+  color,
+  styles
 }`;

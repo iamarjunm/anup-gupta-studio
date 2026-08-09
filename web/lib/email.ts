@@ -51,7 +51,7 @@ export async function sendOrderConfirmationEmail(orderData: any) {
     <tr>
       <td style="padding: 12px; border-bottom: 1px solid #eeeeee;">
         <strong>${item.productTitle}</strong><br/>
-        <span style="color: #666666; font-size: 12px;">Size: ${item.variantSize} | Color: ${item.variantColor}</span>
+        <span style="color: #666666; font-size: 12px;">Size: ${item.variantSize} ${item.variantColor ? `| Color: ${item.variantColor}` : ''} ${item.variantStyle ? `| Style: ${item.variantStyle}` : ''}</span>
       </td>
       <td style="padding: 12px; border-bottom: 1px solid #eeeeee; text-align: center;">${item.quantity}</td>
       <td style="padding: 12px; border-bottom: 1px solid #eeeeee; text-align: right;">₹${item.price.toLocaleString('en-IN')}</td>

@@ -25,10 +25,12 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
-              <div className="print:hidden">
+              <div className="print:hidden contents">
                 <Navbar announcements={announcements} navigation={navigationData} />
               </div>
-              {children}
+              <main>
+                {children}
+              </main>
               <div className="print:hidden">
                 <Footer />
               </div>

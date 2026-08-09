@@ -129,8 +129,8 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
           <form id="cms-form" onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {schema.fields.map((field) => (
               <div key={field.name} className={
-                ['block', 'text', 'image_array', 'sizes_array', 'object', 'reference'].includes(field.type) && field.name.endsWith('s') 
-                  || ['block', 'text', 'image_array', 'sizes_array', 'object'].includes(field.type)
+                ['block', 'text', 'image_array', 'sizes_array', 'styles_array', 'object', 'reference'].includes(field.type) && field.name.endsWith('s') 
+                  || ['block', 'text', 'image_array', 'sizes_array', 'styles_array', 'object'].includes(field.type)
                   ? 'md:col-span-2' 
                   : ''
               }>
@@ -440,6 +440,59 @@ export function CmsFormModal({ schema, doc, isOpen, onClose, onSaved }: { schema
                       className="text-xs font-bold text-black uppercase tracking-wider hover:underline"
                     >
                       + Add Size
+                    </button>
+                  </div>
+                )}
+
+                {field.type === 'styles_array' && (
+                  <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    {(formData[field.name] || []).map((styleObj: any, index: number) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <input
+                          type="text"
+                          placeholder="Style (e.g. Bandhgala)"
+                          value={styleObj.name || ''}
+                          onChange={(e) => {
+                            const newStyles = [...(formData[field.name] || [])];
+                            newStyles[index] = { ...newStyles[index], name: e.target.value, _key: newStyles[index]._key || Math.random().toString(36).substring(2, 9) };
+                            handleChange(field.name, newStyles);
+                          }}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black outline-none"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Price"
+                          value={styleObj.price ?? ''}
+                          onChange={(e) => {
+                            const newStyles = [...(formData[field.name] || [])];
+                            newStyles[index] = { ...newStyles[index], price: parseFloat(e.target.value) || 0 };
+                            handleChange(field.name, newStyles);
+                          }}
+                          className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newStyles = [...(formData[field.name] || [])];
+                            newStyles.splice(index, 1);
+                            handleChange(field.name, newStyles);
+                          }}
+                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newStyles = [...(formData[field.name] || [])];
+                        newStyles.push({ name: '', price: 0, _key: Math.random().toString(36).substring(2, 9) });
+                        handleChange(field.name, newStyles);
+                      }}
+                      className="text-xs font-bold text-black uppercase tracking-wider hover:underline"
+                    >
+                      + Add Style
                     </button>
                   </div>
                 )}

@@ -133,16 +133,21 @@ export default defineType({
       ],
     }),
     defineField({
-      name: 'variants',
-      title: 'Variants',
+      name: 'color',
+      title: 'Color',
+      type: 'string',
+      description: 'The single color variant for this product.',
+    }),
+    defineField({
+      name: 'styles',
+      title: 'Styles & Pricing',
       type: 'array',
       of: [
         {
           type: 'object',
           fields: [
-            { name: 'colorName', title: 'Color Name', type: 'string' },
-            { name: 'variantSize', title: 'Variant Size', type: 'string' },
-            { name: 'priceAdjustment', title: 'Price Adjustment', type: 'number', initialValue: 0 },
+            { name: 'name', title: 'Style Name', type: 'string', validation: (Rule) => Rule.required() },
+            { name: 'price', title: 'Price', type: 'number', description: 'Overrides base price if selected', validation: (Rule) => Rule.required().positive() },
           ],
         },
       ],

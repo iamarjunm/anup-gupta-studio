@@ -338,13 +338,33 @@ export function Navbar({ announcements, navigation }: { announcements?: any[], n
             </div>
 
             <div className="p-6 bg-gray-50 border-t border-gray-100 flex flex-col gap-4">
-              <Link href="/profile" className="flex items-center gap-3 text-sm font-medium text-gray-700" onClick={() => setIsMobileMenuOpen(false)}>
-                <User className="w-5 h-5" strokeWidth={1.5} /> My Account
-              </Link>
-              <div className="pt-4 mt-4 border-t border-gray-100 flex flex-col gap-1">
-                <button onClick={() => { setIsMobileMenuOpen(false); setAuthModalMode('login'); setIsAuthModalOpen(true); }} className="text-left w-full px-4 py-3 text-[13px] font-semibold text-gray-900 bg-gray-50 rounded-lg">Log In</button>
-                <button onClick={() => { setIsMobileMenuOpen(false); setAuthModalMode('signup'); setIsAuthModalOpen(true); }} className="text-left w-full px-4 py-3 text-[13px] font-semibold text-white bg-black rounded-lg">Create Account</button>
-              </div>
+              {user ? (
+                <>
+                  <div className="flex items-center gap-3 text-sm font-medium text-gray-700 pb-2 border-b border-gray-200">
+                    <User className="w-5 h-5" strokeWidth={1.5} /> 
+                    <div className="flex flex-col">
+                      <span>My Account</span>
+                      <span className="text-[11px] font-normal text-gray-500">{user.displayName || user.email}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {sanityUser?.isAdmin && (
+                      <Link href="/admin" className="text-left w-full px-4 py-3 text-[13px] font-semibold text-blue-600 bg-blue-50/50 rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>Admin Portal</Link>
+                    )}
+                    <Link href="/profile" className="text-left w-full px-4 py-3 text-[13px] font-semibold text-gray-900 bg-gray-100/50 rounded-lg" onClick={() => setIsMobileMenuOpen(false)}>Profile</Link>
+                    <button onClick={() => { setIsMobileMenuOpen(false); signOut(auth); }} className="text-left w-full px-4 py-3 text-[13px] font-semibold text-red-600 bg-red-50/50 rounded-lg">Logout</button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <button onClick={() => { setIsMobileMenuOpen(false); setAuthModalMode('login'); setIsAuthModalOpen(true); }} className="w-full px-4 py-3.5 text-[13px] font-semibold text-gray-900 bg-gray-200/50 rounded-lg flex items-center justify-center gap-2 transition-colors hover:bg-gray-200">
+                    <User className="w-4 h-4"/> Log In
+                  </button>
+                  <button onClick={() => { setIsMobileMenuOpen(false); setAuthModalMode('signup'); setIsAuthModalOpen(true); }} className="w-full px-4 py-3.5 text-[13px] font-semibold text-white bg-black hover:bg-[#222] transition-colors rounded-lg text-center">
+                    Create Account
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

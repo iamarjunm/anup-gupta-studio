@@ -58,6 +58,7 @@ export function CollectionFilters({
         {/* Availability Dropdown */}
         <div className="relative">
           <button 
+            suppressHydrationWarning
             onClick={() => { setAvailabilityOpen(!availabilityOpen); setSortOpen(false); setPriceOpen(false); }}
             className="flex items-center gap-2 text-sm text-gray-900 font-medium"
           >
@@ -67,18 +68,21 @@ export function CollectionFilters({
           {availabilityOpen && (
             <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md z-50 py-1">
               <button 
+                suppressHydrationWarning
                 onClick={() => { updateParam('availability', ''); setAvailabilityOpen(false); }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!currentAvailability ? 'font-bold' : ''}`}
               >
                 All
               </button>
               <button 
+                suppressHydrationWarning
                 onClick={() => { updateParam('availability', 'in_stock'); setAvailabilityOpen(false); }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${currentAvailability === 'in_stock' ? 'font-bold' : ''}`}
               >
                 In Stock
               </button>
               <button 
+                suppressHydrationWarning
                 onClick={() => { updateParam('availability', 'out_of_stock'); setAvailabilityOpen(false); }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${currentAvailability === 'out_of_stock' ? 'font-bold' : ''}`}
               >
@@ -91,6 +95,7 @@ export function CollectionFilters({
         {/* Price Dropdown */}
         <div className="relative">
           <button 
+            suppressHydrationWarning
             onClick={() => { setPriceOpen(!priceOpen); setAvailabilityOpen(false); setSortOpen(false); }}
             className="flex items-center gap-2 text-sm text-gray-900 font-medium"
           >
@@ -127,6 +132,7 @@ export function CollectionFilters({
                   The highest price is Rs.{highestPrice ? highestPrice.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) : '0.00'}
                 </p>
                 <button 
+                  suppressHydrationWarning
                   onClick={applyPriceFilter}
                   className="px-4 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-md hover:bg-gray-800 transition-colors"
                 >
@@ -144,6 +150,7 @@ export function CollectionFilters({
         {/* Sort Dropdown */}
         <div className="relative ml-0 sm:ml-4">
           <button 
+            suppressHydrationWarning
             onClick={() => { setSortOpen(!sortOpen); setAvailabilityOpen(false); setPriceOpen(false); }}
             className="flex items-center gap-2 text-sm text-gray-900 font-medium"
           >
@@ -153,24 +160,28 @@ export function CollectionFilters({
           {sortOpen && (
             <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md z-50 py-1">
                <button 
+                suppressHydrationWarning
                 onClick={() => { updateParam('sort', ''); setSortOpen(false); }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!currentSort ? 'font-bold' : ''}`}
               >
                 Featured
               </button>
               <button 
+                suppressHydrationWarning
                 onClick={() => { updateParam('sort', 'price_asc'); setSortOpen(false); }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${currentSort === 'price_asc' ? 'font-bold' : ''}`}
               >
                 Price: Low to High
               </button>
               <button 
+                suppressHydrationWarning
                 onClick={() => { updateParam('sort', 'price_desc'); setSortOpen(false); }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${currentSort === 'price_desc' ? 'font-bold' : ''}`}
               >
                 Price: High to Low
               </button>
               <button 
+                suppressHydrationWarning
                 onClick={() => { updateParam('sort', 'newest'); setSortOpen(false); }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${currentSort === 'newest' ? 'font-bold' : ''}`}
               >
@@ -181,12 +192,14 @@ export function CollectionFilters({
         </div>
         <div className="flex items-center gap-2 ml-4">
           <button 
+            suppressHydrationWarning
             onClick={() => onLayoutChange('grid-4')}
             className={`p-1.5 rounded transition-colors ${currentLayout === 'grid-4' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-900'}`}
           >
             <Grid3x3 className="w-4 h-4" />
           </button>
           <button 
+            suppressHydrationWarning
             onClick={() => onLayoutChange('grid-2')}
             className={`p-1.5 rounded transition-colors ${currentLayout === 'grid-2' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-900'}`}
           >

@@ -50,7 +50,8 @@ export async function POST(request: Request) {
       quantity: item.quantity,
       price: item.price,
       variantSize: item.size,
-      variantColor: item.color || 'Default',
+      variantColor: item.color || '',
+      variantStyle: item.style || '',
     }));
 
     // Calculate discount

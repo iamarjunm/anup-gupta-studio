@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -10,8 +11,11 @@ type ProductFormProps = {
     slug: string;
     title: string;
     price: number;
+    compareAtPrice?: number;
     image: string;
     sizes: { size: string, stock: number }[];
+    color?: string;
+    styles?: { name: string, price: number }[];
   };
   children?: React.ReactNode;
 };
@@ -24,6 +28,11 @@ export function ProductForm({ product, children }: ProductFormProps) {
   const [isAdded, setIsAdded] = useState(false);
   const { addItem } = useCart();
   
+  const defaultStyle = product.styles && product.styles.length > 0 ? product.styles[0] : undefined;
+  const [selectedStyle, setSelectedStyle] = useState(defaultStyle);
+
+  const displayPrice = selectedStyle?.price || product.price;
+  
   const [measurements, setMeasurements] = useState<Record<string, string>>({
     'Chest': '',
     'Waist': '',
@@ -34,6 +43,21 @@ export function ProductForm({ product, children }: ProductFormProps) {
     'Shoulder': '',
     'Shirt Length': ''
   });
+
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const handleScroll = () => {
+      if (!showStickyBar && window.scrollY > 300) {
+        setShowStickyBar(true);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showStickyBar]);
 
   const handleAddToCart = (openCart: boolean = true) => {
     // Basic validation for custom tailored
@@ -48,10 +72,12 @@ export function ProductForm({ product, children }: ProductFormProps) {
     addItem({
       slug: product.slug,
       title: product.title,
-      price: product.price,
+      price: displayPrice,
       image: product.image,
       size: selectedSize,
       quantity,
+      color: product.color,
+      style: selectedStyle?.name,
       ...(selectedSize === 'Custom Tailored' && { measurements })
     }, openCart);
 
@@ -59,18 +85,30 @@ export function ProductForm({ product, children }: ProductFormProps) {
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 2000);
     }
+    setShowStickyBar(false);
   };
 
   return (
     <>
+      <div className="flex items-center gap-3 mb-8">
+        <p className="text-gray-500 text-[13px] tracking-wide">
+          Rs. {displayPrice.toLocaleString('en-IN')}.00
+        </p>
+        {product.compareAtPrice && !selectedStyle && (
+          <p className="text-gray-400 line-through text-[13px] tracking-wide">
+            Rs. {product.compareAtPrice.toLocaleString('en-IN')}.00
+          </p>
+        )}
+      </div>
+
       {/* Size Selector */}
       <div className="mb-6">
-        <h3 className="text-[13px] text-gray-600 mb-3 tracking-wide flex items-center justify-between">
-          <span>Size</span>
+        <h3 className="text-[13px] text-gray-900 mb-3 tracking-wide">
+          Size
         </h3>
         
-        {/* Sizes Grid */}
-        <div className="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 mb-4">
+        {/* Sizes Layout */}
+        <div className="flex flex-wrap gap-2 mb-4">
           {(product.sizes || []).map((sizeObj: any) => {
             const isOutOfStock = sizeObj.stock === 0;
             return (
@@ -78,8 +116,11 @@ export function ProductForm({ product, children }: ProductFormProps) {
                 key={sizeObj.size}
                 disabled={isOutOfStock}
                 suppressHydrationWarning
-                onClick={() => setSelectedSize(sizeObj.size)}
-                className={`h-12 border flex flex-col items-center justify-center transition-colors
+                onClick={() => {
+                  setSelectedSize(sizeObj.size);
+                  setShowStickyBar(true);
+                }}
+                className={`h-12 min-w-[48px] px-4 border flex flex-col items-center justify-center transition-colors
                   ${isOutOfStock ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed' :
                     selectedSize === sizeObj.size ? 'bg-black text-white border-black cursor-pointer' : 'bg-white text-gray-900 border-gray-200 hover:border-black cursor-pointer'}`}
               >
@@ -87,17 +128,20 @@ export function ProductForm({ product, children }: ProductFormProps) {
               </button>
             )
           })}
+          
+          {/* Custom Tailored Button */}
+          <button 
+            suppressHydrationWarning
+            onClick={() => {
+              setSelectedSize('Custom Tailored');
+              setShowStickyBar(true);
+            }}
+            className={`h-12 px-6 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
+              ${selectedSize === 'Custom Tailored' ? 'bg-black text-white border-black' : 'bg-white text-gray-900 border-gray-200 hover:border-black'}`}
+          >
+            Custom Tailored
+          </button>
         </div>
-
-        {/* Custom Tailored Button */}
-        <button 
-          suppressHydrationWarning
-          onClick={() => setSelectedSize('Custom Tailored')}
-          className={`h-11 px-6 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
-            ${selectedSize === 'Custom Tailored' ? 'bg-black text-white border-black font-medium' : 'bg-white text-gray-900 border-gray-200 hover:border-black font-medium'}`}
-        >
-          Custom Tailored
-        </button>
 
         {/* Custom Measurements Form */}
         {selectedSize === 'Custom Tailored' && (
@@ -124,60 +168,139 @@ export function ProductForm({ product, children }: ProductFormProps) {
         )}
       </div>
 
+      {/* Color Display */}
+      {product.color && (
+        <div className="mb-6">
+          <h3 className="text-[13px] text-gray-900 mb-3 tracking-wide">
+            Color
+          </h3>
+          <div className="inline-flex h-12 px-6 items-center justify-center bg-black text-white text-[13px]">
+            {product.color}
+          </div>
+        </div>
+      )}
+
+      {/* Style Selector */}
+      {product.styles && product.styles.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-[13px] text-gray-900 mb-3 tracking-wide">
+            Style
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {product.styles.map((style) => (
+              <button 
+                key={style.name}
+                suppressHydrationWarning
+                onClick={() => setSelectedStyle(style)}
+                className={`h-12 px-6 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
+                  ${selectedStyle?.name === style.name ? 'bg-black text-white border-black' : 'bg-white text-gray-900 border-gray-200 hover:border-black'}`}
+              >
+                {style.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
 
       {children}
 
       {/* Add to Cart Area */}
-      <div className="flex gap-3 mb-10 h-[46px]">
-        {/* Quantity */}
-        <div className="flex items-center border border-gray-200 w-24 shrink-0 bg-white">
+      <div className="flex flex-col gap-3 mb-10">
+        <div className="flex gap-3 h-[46px]">
+          {/* Quantity */}
+          <div className="flex items-center border border-gray-200 w-24 shrink-0 bg-white">
+            <button 
+              suppressHydrationWarning
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              className="px-3 text-gray-400 hover:text-black transition-colors cursor-pointer h-full flex items-center justify-center"
+            >
+              <Minus className="w-3 h-3" strokeWidth={1.5} />
+            </button>
+            <span suppressHydrationWarning className="flex-1 text-center font-medium text-[13px] text-gray-700">{quantity}</span>
+            <button 
+              suppressHydrationWarning
+              onClick={() => setQuantity(quantity + 1)}
+              className="px-3 text-gray-400 hover:text-black transition-colors cursor-pointer h-full flex items-center justify-center"
+            >
+              <Plus className="w-3 h-3" strokeWidth={1.5} />
+            </button>
+          </div>
+          
+          {/* Add to Cart */}
           <button 
             suppressHydrationWarning
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="px-3 text-gray-400 hover:text-black transition-colors cursor-pointer h-full flex items-center justify-center"
+            onClick={() => handleAddToCart(false)}
+            className="flex-1 bg-black hover:bg-[#1a1a1a] text-white flex items-center justify-center gap-2 text-[11px] font-semibold tracking-widest transition-colors cursor-pointer"
           >
-            <Minus className="w-3 h-3" strokeWidth={1.5} />
-          </button>
-          <span suppressHydrationWarning className="flex-1 text-center font-medium text-[13px] text-gray-700">{quantity}</span>
-          <button 
-            suppressHydrationWarning
-            onClick={() => setQuantity(quantity + 1)}
-            className="px-3 text-gray-400 hover:text-black transition-colors cursor-pointer h-full flex items-center justify-center"
-          >
-            <Plus className="w-3 h-3" strokeWidth={1.5} />
+            {isAdded ? (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                ADDED
+              </>
+            ) : (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                ADD TO CART
+              </>
+            )}
           </button>
         </div>
-        
-        {/* Add to Cart */}
-        <button 
-          suppressHydrationWarning
-          onClick={() => handleAddToCart(false)}
-          className="flex-1 bg-black hover:bg-[#1a1a1a] text-white flex items-center justify-center gap-2 text-[11px] font-semibold tracking-widest transition-colors cursor-pointer"
-        >
-          {isAdded ? (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-              ADDED
-            </>
-          ) : (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-              ADD TO CART
-            </>
-          )}
-        </button>
 
         {/* Buy It Now */}
         <button 
           suppressHydrationWarning
           onClick={() => handleAddToCart(true)}
-          className="flex-1 bg-black hover:bg-[#1a1a1a] text-white text-[11px] font-semibold tracking-widest uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          className="w-full h-[46px] bg-black hover:bg-[#1a1a1a] text-white text-[11px] font-semibold tracking-widest uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer"
         >
           BUY IT NOW
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </button>
       </div>
+
+      {/* Sticky Bottom Bar */}
+      {mounted && createPortal(
+        <div 
+          className={`fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-3xl bg-white border border-gray-200 p-2 shadow-2xl z-[9999] transition-transform duration-300 hidden md:flex items-center justify-between ${showStickyBar ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'}`}
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-16 relative bg-gray-100 shrink-0">
+               <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-[13px] font-semibold text-gray-900 truncate max-w-[200px] md:max-w-xs">{product.title}</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                {selectedSize} 
+                {product.color && ` / ${product.color}`}
+                {selectedStyle && ` / ${selectedStyle.name}`}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-6 pr-2">
+            <p className="text-[13px] font-medium text-gray-900 hidden sm:block">
+              Rs. {displayPrice.toLocaleString('en-IN')}.00
+            </p>
+            <button 
+              suppressHydrationWarning
+              onClick={() => handleAddToCart(false)}
+              className="bg-black hover:bg-[#1a1a1a] text-white px-6 py-3 text-[11px] font-semibold tracking-widest flex items-center justify-center gap-2 transition-colors cursor-pointer shrink-0"
+            >
+              {isAdded ? (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  ADDED
+                </>
+              ) : (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                  ADD TO CART
+                </>
+              )}
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 }

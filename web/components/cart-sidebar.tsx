@@ -110,7 +110,11 @@ export function CartSidebar() {
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1 mb-1">Size: {item.size}</p>
+                  <div className="text-xs text-gray-500 mt-1 mb-1">
+                    <p>Size: {item.size}</p>
+                    {item.color && <p>Color: {item.color}</p>}
+                    {item.style && <p>Style: {item.style}</p>}
+                  </div>
                   <p className="text-xs font-medium text-gray-900 mb-3">Rs. {item.price.toLocaleString('en-IN')}</p>
                   
                   <div className="mt-auto flex items-center border border-gray-200 w-24">

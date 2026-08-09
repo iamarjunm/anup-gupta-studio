@@ -100,7 +100,11 @@ export function OrderDetailsModal({ order, isOpen, onClose, onUpdateStatus }: { 
                 <div key={idx} className="flex justify-between items-start gap-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0">
                   <div className="flex-1">
                     <p className="text-sm font-bold text-gray-900">{item.productTitle}</p>
-                    <p className="text-xs text-gray-500 mt-1">Size: {item.variantSize} | Color: {item.variantColor || 'N/A'}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Size: {item.variantSize} 
+                      {item.variantColor && ` | Color: ${item.variantColor}`}
+                      {item.variantStyle && ` | Style: ${item.variantStyle}`}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-900">₹{item.price?.toLocaleString('en-IN')}</p>
