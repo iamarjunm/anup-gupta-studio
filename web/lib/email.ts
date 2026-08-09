@@ -137,6 +137,28 @@ export async function sendOrderStatusUpdateEmail(orderData: any, newStatus: stri
   const subject = `Order Update #${orderData.orderNumber} - ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`;
   const message = statusMessages[newStatus.toLowerCase()] || `Your order status has been updated to ${newStatus}.`;
 
+  const itemsHtml = (orderData.items || []).map((item: any) => `
+    <tr>
+      <td style="padding: 12px; border-bottom: 1px solid #eeeeee;">
+        <strong>${item.productTitle}</strong><br/>
+        <span style="color: #666666; font-size: 12px;">Size: ${item.variantSize} ${item.variantColor ? `| Color: ${item.variantColor}` : ''} ${item.variantStyle ? `| Style: ${item.variantStyle}` : ''}</span>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #eeeeee; text-align: center;">${item.quantity}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eeeeee; text-align: right;">₹${(item.price * item.quantity).toLocaleString('en-IN')}</td>
+    </tr>
+  `).join('');
+
+  let trackingHtml = '';
+  if (newStatus.toLowerCase() === 'shipped' && (orderData.trackingNumber || orderData.trackingLink)) {
+    trackingHtml = `
+      <div style="margin-top: 25px; padding: 20px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+        <h3 style="margin-top: 0; color: #166534; font-size: 16px; margin-bottom: 12px;">Tracking Information</h3>
+        ${orderData.trackingNumber ? `<p style="margin: 0 0 10px 0; color: #15803d;"><strong>Tracking ID:</strong> ${orderData.trackingNumber}</p>` : ''}
+        ${orderData.trackingLink ? `<a href="${orderData.trackingLink}" style="display: inline-block; background-color: #16a34a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">Track Your Package</a>` : ''}
+      </div>
+    `;
+  }
+
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333333;">
       <div style="text-align: center; margin-bottom: 30px;">
@@ -151,7 +173,25 @@ export async function sendOrderStatusUpdateEmail(orderData: any, newStatus: stri
         <div style="margin-top: 20px; padding: 15px; background-color: #ffffff; border-left: 4px solid #111111; font-weight: bold;">
           Order #${orderData.orderNumber} is now: <span style="text-transform: uppercase;">${newStatus}</span>
         </div>
+
+        ${trackingHtml}
       </div>
+
+      ${orderData.items && orderData.items.length > 0 ? `
+      <h3 style="text-transform: uppercase; font-size: 14px; letter-spacing: 1px; border-bottom: 2px solid #111111; padding-bottom: 10px;">Order Items</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
+        <thead>
+          <tr>
+            <th style="text-align: left; padding: 12px; border-bottom: 2px solid #eeeeee; color: #666666;">Item</th>
+            <th style="text-align: center; padding: 12px; border-bottom: 2px solid #eeeeee; color: #666666;">Qty</th>
+            <th style="text-align: right; padding: 12px; border-bottom: 2px solid #eeeeee; color: #666666;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsHtml}
+        </tbody>
+      </table>
+      ` : ''}
 
       <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eeeeee; font-size: 12px; color: #999999;">
         <p>If you have any questions, reply to this email or contact us at support@anupguptastudio.com.</p>

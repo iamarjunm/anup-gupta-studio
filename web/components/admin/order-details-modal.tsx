@@ -7,16 +7,19 @@ import { useState } from 'react';
 
 export function OrderDetailsModal({ order, isOpen, onClose, onUpdateStatus }: { order: any, isOpen: boolean, onClose: () => void, onUpdateStatus: (id: string, status: string) => void }) {
   const [loading, setLoading] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(order?.status || 'processing');
+  const [trackingNumber, setTrackingNumber] = useState(order?.trackingNumber || '');
+  const [trackingLink, setTrackingLink] = useState(order?.trackingLink || '');
   const { toast } = useToast();
 
   if (!isOpen || !order) return null;
 
-  const handleStatusChange = async (newStatus: string) => {
+  const handleUpdateClick = async () => {
     setLoading(true);
-    const res = await updateOrderStatus(order._id, newStatus);
+    const res = await updateOrderStatus(order._id, selectedStatus, trackingNumber, trackingLink);
     if (res.success) {
-      toast(`Order status updated to ${newStatus}`, 'success');
-      onUpdateStatus(order._id, newStatus);
+      toast(`Order status updated to ${selectedStatus}`, 'success');
+      onUpdateStatus(order._id, selectedStatus);
     } else {
       toast(res.message || 'Failed to update status', 'error');
     }
@@ -55,10 +58,10 @@ export function OrderDetailsModal({ order, isOpen, onClose, onUpdateStatus }: { 
               <div className="p-3 bg-gray-50 rounded-full">
                 {getStatusIcon(order.status)}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 space-y-3">
                 <select 
-                  value={order.status || 'processing'}
-                  onChange={(e) => handleStatusChange(e.target.value)}
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
                   disabled={loading}
                   className="w-full text-sm font-bold uppercase tracking-wider py-2 px-3 rounded-lg border border-gray-200 outline-none cursor-pointer focus:ring-2 focus:ring-gray-200 transition-colors bg-white disabled:opacity-50"
                 >
@@ -67,6 +70,41 @@ export function OrderDetailsModal({ order, isOpen, onClose, onUpdateStatus }: { 
                   <option value="delivered">Delivered</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
+
+                {selectedStatus === 'shipped' && (
+                  <div className="space-y-3 pt-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Tracking Number</label>
+                      <input 
+                        type="text" 
+                        value={trackingNumber} 
+                        onChange={e => setTrackingNumber(e.target.value)} 
+                        placeholder="e.g. 1Z9999999999999999"
+                        className="w-full text-sm py-2 px-3 rounded-lg border border-gray-200 outline-none focus:border-black transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Tracking Link (URL)</label>
+                      <input 
+                        type="url" 
+                        value={trackingLink} 
+                        onChange={e => setTrackingLink(e.target.value)} 
+                        placeholder="e.g. https://www.fedex.com/track..."
+                        className="w-full text-sm py-2 px-3 rounded-lg border border-gray-200 outline-none focus:border-black transition-colors"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {(selectedStatus !== order.status || trackingNumber !== (order.trackingNumber || '') || trackingLink !== (order.trackingLink || '')) && (
+                  <button 
+                    onClick={handleUpdateClick}
+                    disabled={loading}
+                    className="w-full mt-2 bg-black text-white text-xs font-bold uppercase tracking-wider py-2 rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50"
+                  >
+                    {loading ? 'Updating...' : 'Save Update & Notify Customer'}
+                  </button>
+                )}
               </div>
             </div>
           </div>

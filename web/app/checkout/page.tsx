@@ -309,6 +309,10 @@ export default function CheckoutPage() {
   }
 
   if (items.length === 0) {
+    if (isProcessing) {
+      return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>;
+    }
+    
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
         <h2 className="text-2xl font-semibold uppercase tracking-widest text-gray-900 mb-4">Your cart is empty</h2>

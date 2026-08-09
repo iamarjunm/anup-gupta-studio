@@ -432,6 +432,25 @@ export default function ProfilePage() {
                               </div>
                             ))}
                           </div>
+
+                          {order.status === 'shipped' && (order.trackingNumber || order.trackingLink) && (
+                            <div className="mt-4 p-4 bg-green-50 border border-green-100 rounded flex flex-col md:flex-row md:items-center justify-between gap-4">
+                              <div>
+                                <p className="text-[10px] text-green-600 uppercase tracking-wider mb-1 font-bold">Tracking Information</p>
+                                {order.trackingNumber && <p className="text-sm font-semibold text-green-900">ID: {order.trackingNumber}</p>}
+                              </div>
+                              {order.trackingLink && (
+                                <a 
+                                  href={order.trackingLink} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-xs font-bold uppercase tracking-wider bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors text-center"
+                                >
+                                  Track Package
+                                </a>
+                              )}
+                            </div>
+                          )}
                           
                           <div className="mt-6 pt-4 border-t border-gray-100 text-right">
                             <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 group-hover:text-gray-900 transition-colors">

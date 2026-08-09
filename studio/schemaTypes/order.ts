@@ -141,6 +141,11 @@ export default defineType({
       type: 'string',
     }),
     defineField({
+      name: 'trackingLink',
+      title: 'Tracking Link',
+      type: 'url',
+    }),
+    defineField({
       name: 'notes',
       title: 'Notes',
       type: 'text',

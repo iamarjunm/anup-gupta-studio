@@ -46,7 +46,9 @@ export async function getAdminRecentOrders() {
         customerEmail,
         total,
         status,
-        createdAt
+        createdAt,
+        trackingNumber,
+        trackingLink
       }`
     );
     return { success: true, orders };
@@ -67,7 +69,9 @@ export async function getAdminOrders() {
         status,
         createdAt,
         items,
-        shippingAddress
+        shippingAddress,
+        trackingNumber,
+        trackingLink
       }`
     );
     return { success: true, orders };
@@ -76,17 +80,18 @@ export async function getAdminOrders() {
   }
 }
 
-export async function updateOrderStatus(orderId: string, newStatus: string) {
+export async function updateOrderStatus(orderId: string, newStatus: string, trackingNumber?: string, trackingLink?: string) {
   try {
-    const updatedOrder = await writeClient
-      .patch(orderId)
-      .set({ status: newStatus })
-      .commit();
+    const patch = writeClient.patch(orderId).set({ status: newStatus });
+    if (trackingNumber !== undefined) patch.set({ trackingNumber });
+    if (trackingLink !== undefined) patch.set({ trackingLink });
+    
+    const updatedOrder = await patch.commit();
     revalidatePath('/admin', 'layout');
     revalidatePath('/profile');
     
-    // Send email asynchronously
-    sendOrderStatusUpdateEmail(updatedOrder, newStatus).catch(console.error);
+    // Send email notification (await to prevent premature termination)
+    await sendOrderStatusUpdateEmail(updatedOrder, newStatus).catch(console.error);
 
     return { success: true, order: updatedOrder };
   } catch (error: any) {
