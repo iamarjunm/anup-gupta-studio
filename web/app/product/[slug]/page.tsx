@@ -120,12 +120,12 @@ async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 xl:gap-20 items-start">
         
         {/* Left Side - Images */}
-        <div className="lg:col-span-7 xl:col-span-7 min-w-0">
+        <div className="lg:col-span-6 xl:col-span-6 min-w-0">
           <ProductGallery images={images} title={product.title} />
         </div>
 
         {/* Right Side - Details */}
-        <div className="lg:col-span-5 xl:col-span-5 flex flex-col pt-4 lg:sticky lg:top-24 min-w-0">
+        <div className="lg:col-span-6 xl:col-span-6 flex flex-col pt-4 lg:sticky lg:top-24 min-w-0">
           <h1 className="text-lg font-medium uppercase text-gray-900 mb-5 text-pretty text-left w-full">
             {product.title}
           </h1>

@@ -47,10 +47,20 @@ export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageU
             src={displayImage}
             alt={title}
             fill
-            className={`object-cover transition-all duration-500 group-hover:scale-105`}
+            className={`object-cover transition-all duration-500 group-hover:scale-105 ${images.length > 1 && currentImageIdx === 0 ? 'group-hover:opacity-0' : ''}`}
             referrerPolicy="no-referrer"
             sizes="(max-width: 768px) 50vw, 20vw"
           />
+          {images.length > 1 && currentImageIdx === 0 && (
+            <Image
+              src={images[1]}
+              alt={title}
+              fill
+              className={`object-cover transition-all duration-500 scale-100 opacity-0 group-hover:scale-105 group-hover:opacity-100`}
+              referrerPolicy="no-referrer"
+              sizes="(max-width: 768px) 50vw, 20vw"
+            />
+          )}
           
           {/* Hover Arrows */}
           {images.length > 1 && (

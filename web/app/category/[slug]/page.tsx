@@ -109,11 +109,11 @@ async function CategoryPageContent({ paramsPromise, searchParamsPromise }: { par
   }
   return (
     <>
-      <div className="mb-12">
-        <h1 className="text-xl md:text-2xl font-semibold uppercase text-gray-900 mb-3 text-pretty w-fit tracking-widest">
+      <div className="mb-12 text-center md:text-left flex flex-col items-center md:items-start">
+        <h1 className="text-xl md:text-2xl font-semibold uppercase text-gray-900 mb-2 text-pretty tracking-normal">
           {title}
         </h1>
-        <div className="text-sm text-gray-700 w-fit mt-1">
+        <div className="text-sm md:text-base text-gray-600 italic font-serif">
           {description}
         </div>
       </div>

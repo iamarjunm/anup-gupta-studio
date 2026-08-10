@@ -91,11 +91,11 @@ export function ProductForm({ product, children }: ProductFormProps) {
   return (
     <>
       <div className="flex items-center gap-3 mb-8">
-        <p className="text-gray-500 text-[13px] tracking-wide">
+        <p className="text-gray-900 font-semibold text-sm tracking-wide">
           Rs. {displayPrice.toLocaleString('en-IN')}.00
         </p>
         {product.compareAtPrice && !selectedStyle && (
-          <p className="text-gray-400 line-through text-[13px] tracking-wide">
+          <p className="text-gray-400 line-through text-sm tracking-wide">
             Rs. {product.compareAtPrice.toLocaleString('en-IN')}.00
           </p>
         )}

@@ -34,11 +34,11 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   return (
     <div className="max-w-[1800px] mx-auto px-4 lg:px-8 py-8 md:py-12">
       {/* Header */}
-      <div className="mb-12">
-        <h1 className="text-2xl md:text-3xl font-semibold uppercase tracking-wide text-gray-900 mb-4">
+      <div className="mb-12 text-center md:text-left flex flex-col items-center md:items-start">
+        <h1 className="text-2xl md:text-3xl font-semibold uppercase tracking-normal text-gray-900 mb-2">
           {title}
         </h1>
-        <div className="text-sm text-gray-900 font-medium">
+        <div className="text-sm md:text-base text-gray-600 italic font-serif">
           {description}
         </div>
       </div>
