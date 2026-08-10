@@ -48,6 +48,7 @@ export default function CheckoutPage() {
     state: '',
     postalCode: '',
     country: 'India',
+    customerNote: '',
   });
 
   useEffect(() => {
@@ -241,6 +242,7 @@ export default function CheckoutPage() {
                 subtotal: orderData.serverCalculatedSubtotal || cartTotal,
                 shippingCost: getShippingCost(),
                 total: orderData.serverCalculatedTotal || getFinalTotal(),
+                customerNote: formData.customerNote,
               })
             });
 
@@ -419,6 +421,22 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               )}
+            </section>
+
+            {/* Additional Info */}
+            <section>
+              <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-900 mb-4 pb-2 border-b border-gray-100">Additional Information</h2>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase mb-2">Order Notes (Optional)</label>
+                <textarea 
+                  name="customerNote" 
+                  value={formData.customerNote} 
+                  onChange={handleChange as any} 
+                  rows={3}
+                  placeholder="Notes about your order, e.g. special notes for delivery."
+                  className="w-full border border-gray-300 px-4 py-3 text-sm focus:border-black outline-none transition-colors resize-none" 
+                />
+              </div>
             </section>
           </form>
         </div>

@@ -136,6 +136,11 @@ export default defineType({
       initialValue: 'processing',
     }),
     defineField({
+      name: 'customerNote',
+      title: 'Customer Note',
+      type: 'text',
+    }),
+    defineField({
       name: 'trackingNumber',
       title: 'Tracking Number',
       type: 'string',

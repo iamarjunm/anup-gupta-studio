@@ -128,6 +128,15 @@ export function OrderDetailsModal({ order, isOpen, onClose, onUpdateStatus }: { 
                 </p>
               </div>
             )}
+
+            {order.customerNote && (
+              <div className="pt-4 border-t border-gray-50">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Customer Note</h3>
+                <p className="text-sm text-gray-700 italic bg-yellow-50 p-3 rounded border border-yellow-100">
+                  "{order.customerNote}"
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Itemized Receipt */}

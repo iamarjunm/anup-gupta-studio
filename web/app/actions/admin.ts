@@ -72,7 +72,8 @@ export async function getAdminOrders() {
         items,
         shippingAddress,
         trackingNumber,
-        trackingLink
+        trackingLink,
+        customerNote
       }`
     );
     return { success: true, orders };

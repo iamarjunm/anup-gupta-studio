@@ -17,7 +17,8 @@ export async function POST(request: Request) {
       discountCode,
       subtotal,
       shippingCost,
-      total
+      total,
+      customerNote
     } = payload;
 
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
