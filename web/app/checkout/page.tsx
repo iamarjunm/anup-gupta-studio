@@ -455,7 +455,7 @@ export default function CheckoutPage() {
                   <div className="flex-1">
                     <h3 className="text-xs font-medium text-gray-900 line-clamp-2 leading-relaxed mb-1">{item.title}</h3>
                     <p className="text-[11px] text-gray-500 mb-1">Size: {item.size} | Qty: {item.quantity}</p>
-                    <p className="text-xs font-medium text-gray-900">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</p>
+                    <p className="text-xs font-medium text-gray-900">Rs. {((item.price || 0) * item.quantity).toLocaleString('en-IN')}</p>
                   </div>
                 </div>
               ))}
@@ -464,7 +464,7 @@ export default function CheckoutPage() {
             <div className="flex flex-col gap-3 py-4 border-t border-b border-gray-100 mb-6">
               <div className="flex justify-between items-center text-sm text-gray-500">
                 <span>Subtotal</span>
-                <span>Rs. {cartTotal.toLocaleString('en-IN')}</span>
+                <span>Rs. {(cartTotal || 0).toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between items-center text-sm text-gray-500">
                 <span>Shipping</span>
@@ -484,7 +484,7 @@ export default function CheckoutPage() {
 
             <div className="flex justify-between items-center text-lg font-semibold text-gray-900 mb-8">
               <span>Total</span>
-              <span>Rs. {getFinalTotal().toLocaleString('en-IN')}</span>
+              <span>Rs. {(getFinalTotal() || 0).toLocaleString('en-IN')}</span>
             </div>
 
             <button 

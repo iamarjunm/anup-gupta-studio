@@ -111,7 +111,7 @@ function SuccessContent() {
                         </div>
                       )}
                     </div>
-                    <p className="font-medium text-gray-900">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</p>
+                    <p className="font-medium text-gray-900">Rs. {((item.price || 0) * item.quantity).toLocaleString('en-IN')}</p>
                   </div>
                 ))}
               </div>
@@ -120,7 +120,7 @@ function SuccessContent() {
             <div className="pt-8 w-full md:w-1/2 ml-auto space-y-3">
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Subtotal</span>
-                <span>Rs. {order.subtotal?.toLocaleString('en-IN') || order.total.toLocaleString('en-IN')}</span>
+                <span>Rs. {order.subtotal?.toLocaleString('en-IN') || (order.total || 0).toLocaleString('en-IN')}</span>
               </div>
               
               {(() => {
@@ -142,7 +142,7 @@ function SuccessContent() {
               </div>
               <div className="flex justify-between text-lg font-bold text-gray-900 pt-2">
                 <span>Total Paid</span>
-                <span>Rs. {order.total.toLocaleString('en-IN')}</span>
+                <span>Rs. {(order.total || 0).toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>

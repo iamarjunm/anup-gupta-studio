@@ -60,7 +60,7 @@ export default function CartPage() {
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                      Rs. {item.price.toLocaleString()}
+                      Rs. {(item.price || 0).toLocaleString()}
                     </span>
                   </div>
                   
@@ -95,7 +95,7 @@ export default function CartPage() {
           <div className="space-y-4 mb-6">
             <div className="flex justify-between text-sm text-gray-600">
               <span>Subtotal</span>
-              <span className="font-medium text-gray-900">Rs. {subtotal.toLocaleString()}</span>
+              <span className="font-medium text-gray-900">Rs. {(subtotal || 0).toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-sm text-gray-600">
               <span>Shipping</span>
@@ -103,14 +103,14 @@ export default function CartPage() {
             </div>
             <div className="flex justify-between text-sm text-gray-600">
               <span>Estimated Tax</span>
-              <span className="font-medium text-gray-900">Rs. {tax.toLocaleString()}</span>
+              <span className="font-medium text-gray-900">Rs. {(tax || 0).toLocaleString()}</span>
             </div>
           </div>
           
           <div className="border-t border-gray-200 pt-4 mb-8">
             <div className="flex justify-between">
               <span className="font-semibold text-gray-900 uppercase tracking-wide">Total</span>
-              <span className="font-semibold text-gray-900">Rs. {total.toLocaleString()}</span>
+              <span className="font-semibold text-gray-900">Rs. {(total || 0).toLocaleString()}</span>
             </div>
           </div>
 

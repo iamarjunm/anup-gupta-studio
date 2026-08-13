@@ -115,7 +115,7 @@ export function CartSidebar() {
                     {item.color && <p>Color: {item.color}</p>}
                     {item.style && <p>Style: {item.style}</p>}
                   </div>
-                  <p className="text-xs font-medium text-gray-900 mb-3">Rs. {item.price.toLocaleString('en-IN')}</p>
+                  <p className="text-xs font-medium text-gray-900 mb-3">Rs. {(item.price || 0).toLocaleString('en-IN')}</p>
                   
                   <div className="mt-auto flex items-center border border-gray-200 w-24">
                     <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-2 py-1 text-gray-500 hover:text-black cursor-pointer"><Minus className="w-3 h-3" /></button>

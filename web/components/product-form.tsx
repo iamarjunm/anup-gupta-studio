@@ -92,11 +92,11 @@ export function ProductForm({ product, children }: ProductFormProps) {
     <>
       <div className="flex items-center gap-3 mb-8">
         <p className="text-gray-900 font-semibold text-sm tracking-wide">
-          Rs. {displayPrice.toLocaleString('en-IN')}.00
+          Rs. {(displayPrice || 0).toLocaleString('en-IN')}.00
         </p>
         {product.compareAtPrice && !selectedStyle && (
           <p className="text-gray-400 line-through text-sm tracking-wide">
-            Rs. {product.compareAtPrice.toLocaleString('en-IN')}.00
+            Rs. {(product.compareAtPrice || 0).toLocaleString('en-IN')}.00
           </p>
         )}
       </div>

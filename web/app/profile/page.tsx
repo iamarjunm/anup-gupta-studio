@@ -336,7 +336,7 @@ export default function ProfilePage() {
                                 </div>
                               )}
                             </div>
-                            <p className="font-medium text-gray-900">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</p>
+                            <p className="font-medium text-gray-900">Rs. {((item.price || 0) * item.quantity).toLocaleString('en-IN')}</p>
                           </div>
                         ))}
                       </div>
@@ -345,7 +345,7 @@ export default function ProfilePage() {
                     <div className="pt-8 border-t border-gray-100">
                       <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
                         <span>Subtotal</span>
-                        <span>Rs. {selectedOrder.subtotal?.toLocaleString('en-IN') || selectedOrder.total.toLocaleString('en-IN')}</span>
+                        <span>Rs. {selectedOrder.subtotal?.toLocaleString('en-IN') || (selectedOrder.total || 0).toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
                         <span>Shipping</span>
@@ -353,7 +353,7 @@ export default function ProfilePage() {
                       </div>
                       <div className="flex justify-between items-center text-lg font-semibold text-gray-900">
                         <span>Total Paid</span>
-                        <span>Rs. {selectedOrder.total.toLocaleString('en-IN')}</span>
+                        <span>Rs. {(selectedOrder.total || 0).toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                     </div>
@@ -390,7 +390,7 @@ export default function ProfilePage() {
                             </div>
                             <div>
                               <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Total</p>
-                              <p className="font-medium text-gray-900">Rs. {order.total.toLocaleString('en-IN')}</p>
+                              <p className="font-medium text-gray-900">Rs. {(order.total || 0).toLocaleString('en-IN')}</p>
                             </div>
                             <div>
                               <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Status</p>
@@ -428,7 +428,7 @@ export default function ProfilePage() {
                                     )}
                                   </div>
                                 </div>
-                                <p className="font-medium text-gray-900">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</p>
+                                <p className="font-medium text-gray-900">Rs. {((item.price || 0) * item.quantity).toLocaleString('en-IN')}</p>
                               </div>
                             ))}
                           </div>

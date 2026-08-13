@@ -61,8 +61,8 @@ export function InvoiceTemplate({ order }: { order: any }) {
                   <p className="text-xs text-gray-500 mt-1">Size: {item.variantSize} {item.variantColor ? `| Color: ${item.variantColor}` : ''}</p>
                 </td>
                 <td className="py-4 text-center text-gray-800">{item.quantity}</td>
-                <td className="py-4 text-right text-gray-800">Rs. {item.price.toLocaleString('en-IN')}</td>
-                <td className="py-4 text-right font-medium text-gray-800">Rs. {(item.price * item.quantity).toLocaleString('en-IN')}</td>
+                <td className="py-4 text-right text-gray-800">Rs. {(item.price || 0).toLocaleString('en-IN')}</td>
+                <td className="py-4 text-right font-medium text-gray-800">Rs. {((item.price || 0) * item.quantity).toLocaleString('en-IN')}</td>
               </tr>
             ))}
           </tbody>
@@ -72,7 +72,7 @@ export function InvoiceTemplate({ order }: { order: any }) {
           <div className="w-64 space-y-3">
             <div className="flex justify-between text-sm text-gray-600">
               <span>Subtotal</span>
-              <span>Rs. {order.subtotal?.toLocaleString('en-IN') || order.total.toLocaleString('en-IN')}</span>
+              <span>Rs. {order.subtotal?.toLocaleString('en-IN') || (order.total || 0).toLocaleString('en-IN')}</span>
             </div>
             {calculatedDiscount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
@@ -86,7 +86,7 @@ export function InvoiceTemplate({ order }: { order: any }) {
             </div>
             <div className="flex justify-between text-lg font-bold text-gray-900 pt-1">
               <span>Total Paid</span>
-              <span>Rs. {order.total.toLocaleString('en-IN')}</span>
+              <span>Rs. {(order.total || 0).toLocaleString('en-IN')}</span>
             </div>
           </div>
         </div>

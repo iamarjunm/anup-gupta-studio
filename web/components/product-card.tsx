@@ -124,9 +124,9 @@ export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageU
             {title}
           </h3>
           <div className="flex items-center gap-2">
-            <span className="text-[13px] text-gray-900 font-medium">Rs.{price.toLocaleString('en-IN')}.00</span>
+            <span className="text-[13px] text-gray-900 font-medium">Rs.{(price || 0).toLocaleString('en-IN')}.00</span>
             {originalPrice && (
-              <span className="text-[12px] text-gray-500 line-through">Rs.{originalPrice.toLocaleString('en-IN')}.00</span>
+              <span className="text-[12px] text-gray-500 line-through">Rs.{(originalPrice || 0).toLocaleString('en-IN')}.00</span>
             )}
           </div>
         </Link>
