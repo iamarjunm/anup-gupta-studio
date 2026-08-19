@@ -26,7 +26,7 @@ export function CollectionGrid({ products, highestPrice = 0 }: { products: any[]
       ) : (
         <div className={
           layout === 'grid-4' 
-            ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-4 gap-y-12"
+            ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-12"
             : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-16"
         }>
           {products.map((product: any, i: number) => (

@@ -27,7 +27,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   ]);
 
   const title = collectionInfo?.title || slug.replace(/-/g, ' ').toUpperCase();
-  const description = collectionInfo?.description || 'From Timeless Comfort to Occasion Elegance.';
+  const description = collectionInfo?.subheading || collectionInfo?.description || 'From Timeless Comfort to Occasion Elegance.';
   
   const products = fetchedProducts.length > 0 ? fetchedProducts : FALLBACK_PRODUCTS;
 
@@ -71,7 +71,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-4 gap-y-12">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-12">
         {products.map((product: any, i: number) => (
           <div key={product.slug || product.seed || i} className="relative group">
             {product.newArrival && (

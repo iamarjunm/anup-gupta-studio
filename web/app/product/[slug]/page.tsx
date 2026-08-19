@@ -139,7 +139,8 @@ async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ 
               image: mainImage || '',
               sizes: product.sizes,
               color: product.color,
-              styles: product.styles
+              styles: product.styles,
+              isAccessory: product.categorySlugs?.includes('accessories') || product.singleCategorySlug === 'accessories' || product.subcategorySlugs?.includes('accessories') || product.singleSubcategorySlug === 'accessories'
             }}
           >
 

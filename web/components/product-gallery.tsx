@@ -118,54 +118,68 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
 
       {/* Full Screen Modal */}
       {mounted && isModalOpen && createPortal(
-        <div className="fixed inset-0 z-[10000] bg-[#111] bg-opacity-100 flex flex-col h-[100dvh] w-screen">
+        <div className="fixed inset-0 z-[10000] bg-[#000] h-[100dvh] w-screen overflow-hidden">
           {/* Close Button */}
           <button 
             onClick={() => setIsModalOpen(false)}
-            className="absolute top-4 right-4 text-white/70 hover:text-white z-50 p-2"
+            className="fixed top-4 right-4 sm:top-6 sm:right-6 text-white/70 hover:text-white z-[10002] p-2 bg-black/40 hover:bg-black/80 rounded-full transition-all backdrop-blur-sm"
           >
-            <X className="w-8 h-8" strokeWidth={1} />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
           </button>
 
-          {/* Modal Main Image */}
-          <div className="flex-1 relative w-full flex items-center justify-center p-0 sm:p-4 min-h-0">
-             <div className="relative w-full h-full max-w-5xl max-h-[85vh]">
-               <Image 
-                  src={mainImage} 
-                  alt={title}
-                  fill
-                  className="object-contain"
+          {/* Modal Main Image Scroll Area */}
+          <div 
+            id="gallery-scroll-container"
+            className="absolute inset-0 w-full h-full overflow-y-auto scroll-smooth flex flex-col [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            onScroll={(e) => {
+              const target = e.currentTarget;
+              // Estimate which image is in view
+              const imageHeight = target.scrollWidth * 1.333; // Approx 3:4 aspect ratio
+              const index = Math.round(target.scrollTop / imageHeight);
+              if (index !== activeIndex && index >= 0 && index < images.length) {
+                setActiveIndex(index);
+              }
+            }}
+          >
+            {images.map((img: string, i: number) => (
+              <div 
+                key={i}
+                id={`modal-img-${i}`}
+                className="w-full relative"
+                ref={el => {
+                  if (el && isModalOpen && i === activeIndex && !el.dataset.scrolled) {
+                    el.scrollIntoView();
+                    el.dataset.scrolled = "true";
+                  }
+                }}
+              >
+                <Image 
+                  src={img} 
+                  alt={`${title} - Image ${i + 1}`}
+                  width={1500}
+                  height={2000}
+                  className="w-full h-auto block"
                   referrerPolicy="no-referrer"
                   sizes="100vw"
+                  priority={i === activeIndex}
                 />
-             </div>
-             
-             {/* Arrows in Modal */}
-             {images.length > 1 && (
-                <>
-                  <button 
-                    onClick={prevImage}
-                    className="absolute left-2 sm:left-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-2 transition-colors drop-shadow-md"
-                  >
-                    <MoveLeft className="w-10 h-10 sm:w-12 sm:h-12" strokeWidth={1} />
-                  </button>
-                  <button 
-                    onClick={nextImage}
-                    className="absolute right-2 sm:right-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-2 transition-colors drop-shadow-md"
-                  >
-                    <MoveRight className="w-10 h-10 sm:w-12 sm:h-12" strokeWidth={1} />
-                  </button>
-                </>
-              )}
+              </div>
+            ))}
           </div>
 
-          {/* Modal Thumbnails */}
-          <div className="h-24 sm:h-32 shrink-0 w-full bg-[#0a0a0a] flex items-center justify-start sm:justify-center gap-3 p-4 overflow-x-auto border-t border-white/5">
+          {/* Modal Thumbnails Sidebar (Overlaid) */}
+          <div className="absolute top-0 right-0 w-[80px] sm:w-[120px] h-full flex flex-col items-center gap-3 sm:gap-4 p-3 sm:p-4 overflow-y-auto py-20 z-[10001] pointer-events-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {images.map((img: string, i: number) => (
               <button 
                 key={i} 
-                onClick={() => setActiveIndex(i)}
-                className={`relative h-full aspect-[3/4] border transition-colors shrink-0 ${activeIndex === i ? 'border-white/50' : 'border-transparent hover:border-white/30 opacity-50 hover:opacity-100'}`}
+                onClick={() => {
+                  setActiveIndex(i);
+                  const targetElement = document.getElementById(`modal-img-${i}`);
+                  if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className={`pointer-events-auto relative w-full aspect-[3/4] border transition-all shrink-0 ${activeIndex === i ? 'border-white/80 opacity-100 scale-100' : 'border-transparent opacity-40 hover:opacity-100 scale-95'}`}
               >
                 <Image 
                   src={img} 

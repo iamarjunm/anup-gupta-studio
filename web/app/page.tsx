@@ -59,7 +59,8 @@ const mapProduct = (product: any) => ({
   slug: product.slug,
   sizes: product.sizes,
   color: product.color,
-  styles: product.styles
+  styles: product.styles,
+  categorySlugs: product.categorySlugs
 });
 
 function HomeLoader() {
@@ -267,21 +268,37 @@ async function HomeContent() {
       </section>
 
       {/* Instagram */}
-      <section className="w-full">
+      <section className="w-full bg-white pb-16">
         <div className="py-8 md:py-12 text-center border-t border-gray-100">
           <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-900">
             FOLLOW US ON INSTAGRAM
           </h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 w-full">
-          {Array.from({ length: displayInstaCount }).map((_, i) => {
-            const link = instagramLinks[i] || "#";
-            return (
-              <Suspense key={i} fallback={<div className="aspect-[4/5] bg-gray-100 animate-pulse"></div>}>
-                <InstagramPost url={link} index={i} />
-              </Suspense>
-            );
-          })}
+        
+        <div className="max-w-[1920px] mx-auto px-4 md:px-8 xl:px-12">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 w-full gap-0">
+            {Array.from({ length: displayInstaCount }).map((_, i) => {
+              const linkItem = instagramLinks[i];
+              const link = typeof linkItem === 'object' ? (linkItem?.link || "#") : (typeof linkItem === 'string' ? linkItem : "#");
+              const coverImage = typeof linkItem === 'object' ? linkItem?.coverImage : undefined;
+              return (
+                <Suspense key={i} fallback={<div className="aspect-[170/302] bg-gray-100 animate-pulse"></div>}>
+                  <InstagramPost url={link} index={i} coverImage={coverImage} />
+                </Suspense>
+              );
+            })}
+          </div>
+          
+          <div className="mt-2 md:mt-3 text-center">
+            <a 
+              href="https://www.instagram.com/anupguptadesigner/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block text-[11px] md:text-xs font-medium text-gray-800 border-b border-gray-600 pb-[2px] hover:text-black hover:border-black transition-colors tracking-wide"
+            >
+              @anupguptadesigner
+            </a>
+          </div>
         </div>
       </section>
     </main>

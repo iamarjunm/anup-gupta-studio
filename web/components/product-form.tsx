@@ -16,13 +16,14 @@ type ProductFormProps = {
     sizes: { size: string, stock: number }[];
     color?: string;
     styles?: { name: string, price: number }[];
+    isAccessory?: boolean;
   };
   children?: React.ReactNode;
 };
 
 export function ProductForm({ product, children }: ProductFormProps) {
   const { toast } = useToast();
-  const defaultSize = product.sizes?.find(s => s.stock > 0)?.size || 'Custom Tailored';
+  const defaultSize = product.sizes?.find(s => s.stock > 0)?.size || (product.isAccessory ? (product.sizes?.[0]?.size || '') : 'Custom Tailored');
   const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -130,21 +131,23 @@ export function ProductForm({ product, children }: ProductFormProps) {
           })}
           
           {/* Custom Tailored Button */}
-          <button 
-            suppressHydrationWarning
-            onClick={() => {
-              setSelectedSize('Custom Tailored');
-              setShowStickyBar(true);
-            }}
-            className={`h-10 px-5 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
-              ${selectedSize === 'Custom Tailored' ? 'bg-black text-white border-black' : 'bg-white text-gray-900 border-gray-200 hover:border-black'}`}
-          >
-            Custom Tailored
-          </button>
+          {!product.isAccessory && (
+            <button 
+              suppressHydrationWarning
+              onClick={() => {
+                setSelectedSize('Custom Tailored');
+                setShowStickyBar(true);
+              }}
+              className={`h-10 px-5 border flex items-center justify-center text-[13px] transition-colors cursor-pointer
+                ${selectedSize === 'Custom Tailored' ? 'bg-black text-white border-black' : 'bg-white text-gray-900 border-gray-200 hover:border-black'}`}
+            >
+              Custom Tailored
+            </button>
+          )}
         </div>
 
         {/* Custom Measurements Form */}
-        {selectedSize === 'Custom Tailored' && (
+        {!product.isAccessory && selectedSize === 'Custom Tailored' && (
           <div className="mt-6 mb-6 p-5 bg-[#fcfcfc] border border-gray-200 animate-in fade-in slide-in-from-top-2 duration-300">
             <h4 className="text-[13px] font-semibold tracking-wide text-gray-900 mb-4">Enter Your Measurements (inches/cm)</h4>
             <div className="grid grid-cols-2 gap-4">

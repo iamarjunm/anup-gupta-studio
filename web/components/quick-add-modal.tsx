@@ -15,6 +15,7 @@ interface QuickAddModalProps {
     sizes?: { size: string; stock?: number }[];
     color?: string;
     styles?: { name: string; price: number }[];
+    categorySlugs?: string[];
   };
 }
 
@@ -26,6 +27,7 @@ const DEFAULT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6
 export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) {
   const { addItem } = useCart();
   const { toast } = useToast();
+  const isAccessory = product.categorySlugs?.includes('accessories');
   const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes.map(s => s.size) : DEFAULT_SIZES;
   
   const [selectedSize, setSelectedSize] = useState(availableSizes[0] || 'XS');
@@ -116,7 +118,7 @@ export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) 
                   );
                 })}
                 {/* Custom Tailored Button */}
-                {(!product.sizes || !product.sizes.some(s => s.size === 'Custom Tailored')) && (
+                {!isAccessory && (!product.sizes || !product.sizes.some(s => s.size === 'Custom Tailored')) && (
                   <button
                     onClick={() => setSelectedSize('Custom Tailored')}
                     className={`px-4 py-2 text-sm border transition-colors cursor-pointer ${
@@ -132,7 +134,7 @@ export function QuickAddModal({ isOpen, onClose, product }: QuickAddModalProps) 
             </div>
 
             {/* Custom Measurements Form */}
-            {selectedSize === 'Custom Tailored' && (
+            {!isAccessory && selectedSize === 'Custom Tailored' && (
               <div className="mt-6 p-5 bg-[#fcfcfc] border border-gray-200">
                 <h4 className="text-[13px] font-semibold tracking-wide text-gray-900 mb-4">Enter Your Measurements (inches/cm)</h4>
                 <div className="grid grid-cols-2 gap-4">

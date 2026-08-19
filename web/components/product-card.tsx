@@ -18,9 +18,10 @@ interface ProductCardProps {
   sizes?: { size: string; stock?: number }[];
   color?: string;
   styles?: { name: string; price: number }[];
+  categorySlugs?: string[];
 }
 
-export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageUrl, galleryUrls, href, slug, sizes, color, styles }: ProductCardProps) {
+export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageUrl, galleryUrls, href, slug, sizes, color, styles, categorySlugs }: ProductCardProps) {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
@@ -142,7 +143,8 @@ export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageU
           slug: slug || href.split('/').pop() || '',
           sizes: sizes,
           color: color,
-          styles: styles
+          styles: styles,
+          categorySlugs: categorySlugs
         }}
       />
     </>

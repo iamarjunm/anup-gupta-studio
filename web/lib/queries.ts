@@ -8,7 +8,8 @@ export const SEARCH_PRODUCTS_QUERY = `*[_type == "product" && (title match $quer
   "galleryUrls": gallery[].asset->url,
   sizes,
   color,
-  styles
+  styles,
+  "categorySlugs": categories[]->slug.current
 }`;
 
 export const NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true][0...5] {
@@ -21,7 +22,8 @@ export const NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true][0
   "galleryUrls": gallery[].asset->url,
   sizes,
   color,
-  styles
+  styles,
+  "categorySlugs": categories[]->slug.current
 }`;
 
 export const BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true][0...5] {
@@ -34,7 +36,8 @@ export const BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true][0.
   "galleryUrls": gallery[].asset->url,
   sizes,
   color,
-  styles
+  styles,
+  "categorySlugs": categories[]->slug.current
 }`;
 
 export const FEATURED_SECTIONS_QUERY = `*[(_type == "category" || _type == "subcategory") && (featuredOnHome == true || displayOnHome == true)] | order(order asc) {
@@ -84,7 +87,13 @@ export const PRODUCT_BY_SLUG_QUERY = `*[_type == "product" && slug.current == $s
 export const GLOBAL_SETTINGS_QUERY = `*[_type == "siteSettings"][0] {
   productionAndShipping,
   disclaimer,
-  instagramLinks
+  "instagramLinks": instagramLinks[] {
+    "link": select(
+      defined(link) => link,
+      @
+    ),
+    "coverImage": coverImage.asset->url
+  }
 }`;
 
 export const HERO_QUERY = `*[_type == "heroSection"] {
@@ -114,6 +123,7 @@ export const ANNOUNCEMENT_BAR_QUERY = `*[_type == "announcementBar" && active ==
 
 export const COLLECTION_INFO_QUERY = `*[(_type == "category" || _type == "subcategory" || _type == "collection") && slug.current == $slug][0] {
   title,
+  subheading,
   description
 }`;
 
@@ -137,7 +147,8 @@ export const PRODUCTS_BY_COLLECTION_QUERY = `*[_type == "product" && (
   _createdAt,
   sizes,
   color,
-  styles
+  styles,
+  "categorySlugs": categories[]->slug.current
 }`;
 
 export const ALL_PRODUCTS_QUERY = `*[_type == "product"] {
@@ -153,7 +164,8 @@ export const ALL_PRODUCTS_QUERY = `*[_type == "product"] {
   _createdAt,
   sizes,
   color,
-  styles
+  styles,
+  "categorySlugs": categories[]->slug.current
 }`;
 
 export const ALL_NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true] {
@@ -169,7 +181,8 @@ export const ALL_NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == tru
   _createdAt,
   sizes,
   color,
-  styles
+  styles,
+  "categorySlugs": categories[]->slug.current
 }`;
 
 export const ALL_BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true] {
@@ -185,7 +198,8 @@ export const ALL_BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true
   _createdAt,
   sizes,
   color,
-  styles
+  styles,
+  "categorySlugs": categories[]->slug.current
 }`;
 
 export const NAVIGATION_QUERY = `{
@@ -222,7 +236,8 @@ export const RELATED_PRODUCTS_QUERY = `*[_type == "product" && slug.current != $
   newArrival,
   sizes,
   color,
-  styles
+  styles,
+  "categorySlugs": categories[]->slug.current
 }`;
 
 export const FALLBACK_PRODUCTS_QUERY = `*[_type == "product" && slug.current != $slug] | order(_createdAt desc) [0...4] {
@@ -237,5 +252,6 @@ export const FALLBACK_PRODUCTS_QUERY = `*[_type == "product" && slug.current != 
   newArrival,
   sizes,
   color,
-  styles
+  styles,
+  "categorySlugs": categories[]->slug.current
 }`;

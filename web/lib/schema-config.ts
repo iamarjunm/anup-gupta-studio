@@ -20,6 +20,7 @@ export const cmsSchemas: SchemaConfig[] = [
     title: 'Category',
     fields: [
       { name: 'title', title: 'Title', type: 'string' },
+      { name: 'subheading', title: 'Subheading', type: 'string' },
       { name: 'slug', title: 'Slug', type: 'slug' },
       { name: 'image', title: 'Image', type: 'image' },
       { name: 'order', title: 'Order', type: 'number' },
@@ -32,6 +33,7 @@ export const cmsSchemas: SchemaConfig[] = [
     title: 'Subcategory',
     fields: [
       { name: 'title', title: 'Title', type: 'string' },
+      { name: 'subheading', title: 'Subheading', type: 'string' },
       { name: 'slug', title: 'Slug', type: 'slug' },
       { name: 'parentCategory', title: 'Parent Category', type: 'reference', referenceTo: 'category' },
       { name: 'image', title: 'Image', type: 'image' },
@@ -44,6 +46,7 @@ export const cmsSchemas: SchemaConfig[] = [
     title: 'Collection',
     fields: [
       { name: 'title', title: 'Title', type: 'string' },
+      { name: 'subheading', title: 'Subheading', type: 'string' },
       { name: 'slug', title: 'Slug', type: 'slug' },
       { name: 'description', title: 'Description', type: 'text' },
       { name: 'image', title: 'Image', type: 'image' },

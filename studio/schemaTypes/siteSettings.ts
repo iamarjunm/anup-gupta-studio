@@ -46,32 +46,6 @@ export default defineType({
       type: 'string',
     }),
     defineField({
-      name: 'promotionalGames',
-      title: 'Promotional Games Settings',
-      type: 'object',
-      fields: [
-        { name: 'activeGame', type: 'string', title: 'Active Game' },
-        { name: 'enabled', type: 'boolean', title: 'Enabled', initialValue: false },
-        { name: 'autoOpenDelay', type: 'number', title: 'Auto Open Delay' },
-        { name: 'offerCycleId', type: 'string', title: 'Offer Cycle ID' },
-        { name: 'replayInterval', type: 'number', title: 'Replay Interval' },
-        { name: 'showFloatingButton', type: 'boolean', title: 'Show Floating Button' },
-        {
-          name: 'crazySpinGameConfig',
-          title: 'Crazy Spin Config',
-          type: 'object',
-          fields: [
-            { name: 'bombProbability', type: 'number' },
-            { name: 'comboMultiplierEnabled', type: 'boolean' },
-            { name: 'enabled', type: 'boolean' },
-            { name: 'maxComboSpins', type: 'number' },
-            { name: 'numberOfSegments', type: 'number' },
-            { name: 'spinDuration', type: 'number' },
-          ]
-        }
-      ]
-    }),
-    defineField({
       name: 'shippingSettings',
       title: 'Shipping Settings',
       type: 'object',
@@ -97,7 +71,17 @@ export default defineType({
       name: 'instagramLinks',
       title: 'Instagram Post Links',
       type: 'array',
-      of: [{ type: 'url' }],
+      of: [
+        {
+          type: 'object',
+          name: 'instagramPost',
+          title: 'Instagram Post with Cover',
+          fields: [
+            { name: 'link', type: 'url', title: 'Instagram Link' },
+            { name: 'coverImage', type: 'image', title: 'Cover Image (Upload)', description: 'Upload an image via Sanity Studio.' }
+          ]
+        }
+      ],
       validation: (Rule) => Rule.max(10),
       description: 'Add up to 10 Instagram post or reel URLs to show in the footer.',
     }),

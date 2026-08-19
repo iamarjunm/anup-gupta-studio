@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, Upload } from 'lucide-react';
 import { SchemaConfig } from '@/lib/schema-config';
-import { updateDocument, createDocument } from '@/app/actions/cms';
+import { updateDocument, createDocument, uploadImageToSanity } from '@/app/actions/cms';
 import { useToast } from '@/contexts/ToastContext';
 
 export function SiteSettingsEditor({ schema, initialDoc }: { schema: SchemaConfig, initialDoc: any }) {
@@ -25,6 +25,31 @@ export function SiteSettingsEditor({ schema, initialDoc }: { schema: SchemaConfi
     });
   };
 
+  const handleCoverImageUpload = async (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    
+    try {
+      const res = await uploadImageToSanity(fd);
+      if (res.success && res.asset) {
+        const newLinks = [...(formData.instagramLinks || [])];
+        const existingItem = typeof newLinks[idx] === 'object' ? newLinks[idx] : { link: newLinks[idx] || '' };
+        newLinks[idx] = { ...existingItem, _type: 'instagramPost', coverImage: res.asset };
+        updateField(['instagramLinks'], newLinks);
+        toast('Image uploaded successfully', 'success');
+      } else {
+        toast('Image upload failed: ' + (res.message || ''), 'error');
+      }
+    } catch (error) {
+      toast('Image upload failed', 'error');
+    }
+    setLoading(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -39,6 +64,15 @@ export function SiteSettingsEditor({ schema, initialDoc }: { schema: SchemaConfi
         }];
       }
     });
+
+    if (Array.isArray(dataToSave.instagramLinks)) {
+      dataToSave.instagramLinks = dataToSave.instagramLinks.map((linkItem: any) => {
+        if (typeof linkItem === 'string') {
+          return { _type: 'instagramPost', link: linkItem };
+        }
+        return { ...linkItem, _type: 'instagramPost' };
+      }).filter((item: any) => item.link);
+    }
 
     try {
       let res;
@@ -121,68 +155,88 @@ export function SiteSettingsEditor({ schema, initialDoc }: { schema: SchemaConfi
           </div>
         </div>
 
-        {/* Promotional Games */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-3">Promotional Games</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-center">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={formData.promotionalGames?.enabled || false} onChange={e => updateField(['promotionalGames', 'enabled'], e.target.checked)} className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black" />
-                <span className="text-sm font-bold text-gray-700">Enable Promotional Games</span>
-              </label>
-            </div>
-            <div className="flex items-center">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={formData.promotionalGames?.showFloatingButton || false} onChange={e => updateField(['promotionalGames', 'showFloatingButton'], e.target.checked)} className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black" />
-                <span className="text-sm font-bold text-gray-700">Show Floating Trigger Button</span>
-              </label>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Active Game</label>
-              <select value={formData.promotionalGames?.activeGame || ''} onChange={e => updateField(['promotionalGames', 'activeGame'], e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black outline-none">
-                <option value="">None</option>
-                <option value="crazySpin">Crazy Spin</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Auto-open Delay (ms)</label>
-              <input type="number" value={formData.promotionalGames?.autoOpenDelay || 0} onChange={e => updateField(['promotionalGames', 'autoOpenDelay'], parseInt(e.target.value))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black outline-none" />
-            </div>
-            
-            {/* Crazy Spin Specifics */}
-            {formData.promotionalGames?.activeGame === 'crazySpin' && (
-              <div className="md:col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-3"><h4 className="text-xs font-bold uppercase text-gray-500">Crazy Spin Config</h4></div>
-                <div>
-                   <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase">Bomb Probability (0-1)</label>
-                   <input type="number" step="0.1" value={formData.promotionalGames?.crazySpinGameConfig?.bombProbability || 0} onChange={e => updateField(['promotionalGames', 'crazySpinGameConfig', 'bombProbability'], parseFloat(e.target.value))} className="w-full px-2 py-1 text-sm border rounded-md" />
-                </div>
-                <div>
-                   <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase">Segments</label>
-                   <input type="number" value={formData.promotionalGames?.crazySpinGameConfig?.numberOfSegments || 8} onChange={e => updateField(['promotionalGames', 'crazySpinGameConfig', 'numberOfSegments'], parseInt(e.target.value))} className="w-full px-2 py-1 text-sm border rounded-md" />
-                </div>
-                <div>
-                   <label className="block text-[10px] font-bold text-gray-700 mb-1 uppercase">Spin Duration (ms)</label>
-                   <input type="number" value={formData.promotionalGames?.crazySpinGameConfig?.spinDuration || 5000} onChange={e => updateField(['promotionalGames', 'crazySpinGameConfig', 'spinDuration'], parseInt(e.target.value))} className="w-full px-2 py-1 text-sm border rounded-md" />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+
 
         {/* Global Content */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
           <h2 className="text-sm font-bold uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-3">Global Content</h2>
           <div className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Instagram Post Links (Comma Separated)</label>
-              <textarea 
-                rows={3} 
-                value={Array.isArray(formData.instagramLinks) ? formData.instagramLinks.join(', ') : ''} 
-                onChange={e => updateField(['instagramLinks'], e.target.value.split(',').map(s => s.trim()))} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black outline-none font-mono text-sm" 
-                placeholder="https://instagram.com/p/..., https://instagram.com/p/..."
-              />
+              <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Instagram Post Links</label>
+              <div className="mb-3 text-[11px] text-gray-500">Note: You can paste a direct image URL below, or use Sanity Studio for full image uploads.</div>
+              <div className="space-y-3">
+                {(formData.instagramLinks || []).map((linkItem: any, idx: number) => {
+                  const link = typeof linkItem === 'string' ? linkItem : (linkItem?.link || '');
+                  
+                  return (
+                    <div key={idx} className="flex flex-col gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs font-semibold text-gray-500 uppercase">Item {idx + 1}</span>
+                        <button 
+                          onClick={() => {
+                            const newLinks = [...(formData.instagramLinks || [])];
+                            newLinks.splice(idx, 1);
+                            updateField(['instagramLinks'], newLinks);
+                          }}
+                          className="text-red-500 text-xs font-medium hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <input 
+                        type="text" 
+                        value={link} 
+                        onChange={e => {
+                          const newLinks = [...(formData.instagramLinks || [])];
+                          const existingItem = typeof linkItem === 'object' ? linkItem : {};
+                          newLinks[idx] = { ...existingItem, _type: 'instagramPost', link: e.target.value };
+                          updateField(['instagramLinks'], newLinks);
+                        }} 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black outline-none font-mono text-sm mb-2" 
+                        placeholder="Instagram Post/Reel URL"
+                      />
+                      <div className="mt-2 flex flex-col md:flex-row items-center gap-4">
+                        {typeof linkItem === 'object' && linkItem?.coverImage?.asset?._ref && (
+                          <div className="w-16 h-16 bg-gray-100 rounded-lg border flex items-center justify-center overflow-hidden shrink-0 relative group">
+                            <img 
+                              src={`https://cdn.sanity.io/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/${process.env.NEXT_PUBLIC_SANITY_DATASET}/${linkItem.coverImage.asset._ref.split('-')[1]}-${linkItem.coverImage.asset._ref.split('-')[2]}.${linkItem.coverImage.asset._ref.split('-')[3]}`}
+                              alt="Cover Preview" 
+                              className="w-full h-full object-cover" 
+                            />
+                            <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center">
+                              <button 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  const newLinks = [...(formData.instagramLinks || [])];
+                                  const existingItem = typeof linkItem === 'object' ? linkItem : { link };
+                                  newLinks[idx] = { ...existingItem, _type: 'instagramPost', coverImage: null };
+                                  updateField(['instagramLinks'], newLinks);
+                                }}
+                                className="text-white text-[10px] font-bold"
+                              >
+                                REMOVE
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        <label className="flex-1 w-full border-2 border-dashed border-gray-300 rounded-lg p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors">
+                          <Upload className="w-4 h-4 text-gray-400 mb-1" />
+                          <span className="text-[10px] font-medium text-gray-500">Upload optional cover image</span>
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleCoverImageUpload(idx, e)} disabled={loading} />
+                        </label>
+                      </div>
+                    </div>
+                  );
+                })}
+                <button 
+                  onClick={() => {
+                    updateField(['instagramLinks'], [...(formData.instagramLinks || []), { _type: 'instagramPost', link: '', coverImage: null }]);
+                  }}
+                  className="px-3 py-2 bg-black text-white text-xs font-bold rounded-lg uppercase tracking-wider mt-2"
+                >
+                  + Add Link
+                </button>
+              </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Global Production & Shipping Info</label>

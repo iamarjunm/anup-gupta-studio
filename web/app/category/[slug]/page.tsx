@@ -60,7 +60,7 @@ async function CategoryPageContent({ paramsPromise, searchParamsPromise }: { par
   }
 
   const title = collectionInfo?.title || slug.replace(/-/g, ' ').toUpperCase();
-  const description = collectionInfo?.description || 'From Timeless Comfort to Occasion Elegance.';
+  const description = collectionInfo?.subheading || collectionInfo?.description || 'From Timeless Comfort to Occasion Elegance.';
   
   let products = fetchedProducts || [];
 

@@ -12,6 +12,12 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'subheading',
+      title: 'Subheading',
+      type: 'string',
+      description: 'Optional subheading to display on the subcategory page',
+    }),
+    defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
