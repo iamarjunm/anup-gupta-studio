@@ -3,10 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import { ProductCard } from './product-card';
-import { searchProducts } from '@/app/actions/search';
+import { searchProducts, getBestSellers } from '@/app/actions/search';
 import { useDebounce } from '@/hooks/useDebounce';
-
-
 
 export function SearchModal({ triggerClass }: { triggerClass?: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,7 +12,27 @@ export function SearchModal({ triggerClass }: { triggerClass?: string }) {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   
+  const [bestSellers, setBestSellers] = useState<any[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+  
   const debouncedQuery = useDebounce(query, 400);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Fetch best sellers
+      getBestSellers().then(res => setBestSellers(res || []));
+      
+      // Load recently viewed
+      try {
+        const stored = localStorage.getItem('recentlyViewed');
+        if (stored) {
+          setRecentlyViewed(JSON.parse(stored));
+        }
+      } catch (e) {
+        console.error('Error loading recently viewed', e);
+      }
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     async function performSearch() {
@@ -68,30 +86,95 @@ export function SearchModal({ triggerClass }: { triggerClass?: string }) {
             </div>
 
             <div className="space-y-8">
-              {query && (
-                 <h3 className="text-sm font-semibold text-gray-900 mb-4">
-                   {loading ? 'Searching...' : (results.length === 0 ? 'No results found.' : 'Search Results:')}
-                 </h3>
+              {query ? (
+                <>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                    {loading ? 'Searching...' : (results.length === 0 ? 'No results found.' : 'Search Results:')}
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {results.map((product: any, idx: number) => (
+                      <ProductCard 
+                        key={product.slug || product.title || idx}
+                        title={product.title}
+                        price={product.price}
+                        originalPrice={product.compareAtPrice || product.originalPrice}
+                        imageUrl={product.imageUrl}
+                        hoverImageUrl={product.hoverImageUrl}
+                        galleryUrls={product.galleryUrls}
+                        href={`/product/${product.slug || 'sample-product'}`}
+                        slug={product.slug}
+                        sizes={product.sizes}
+                        color={product.color}
+                        styles={product.styles}
+                        onClick={() => setIsOpen(false)}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-10">
+                  {recentlyViewed.length > 0 && (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-base font-medium text-gray-900">Recently viewed</h3>
+                        <button 
+                          onClick={() => {
+                            localStorage.removeItem('recentlyViewed');
+                            setRecentlyViewed([]);
+                          }} 
+                          className="text-sm text-gray-500 hover:text-black uppercase tracking-wider"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {recentlyViewed.map((product: any, idx: number) => (
+                          <ProductCard 
+                            key={`recent-${product.slug || product.title || idx}`}
+                            title={product.title}
+                            price={product.price}
+                            originalPrice={product.compareAtPrice || product.originalPrice}
+                            imageUrl={product.imageUrl}
+                            hoverImageUrl={product.hoverImageUrl}
+                            galleryUrls={product.galleryUrls}
+                            href={`/product/${product.slug || 'sample-product'}`}
+                            slug={product.slug}
+                            sizes={product.sizes}
+                            color={product.color}
+                            styles={product.styles}
+                            onClick={() => setIsOpen(false)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {bestSellers.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-base font-medium text-gray-900">Best Sellers</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {bestSellers.map((product: any, idx: number) => (
+                          <ProductCard 
+                            key={`bestseller-${product.slug || product.title || idx}`}
+                            title={product.title}
+                            price={product.price}
+                            originalPrice={product.compareAtPrice || product.originalPrice}
+                            imageUrl={product.imageUrl}
+                            hoverImageUrl={product.hoverImageUrl}
+                            galleryUrls={product.galleryUrls}
+                            href={`/product/${product.slug || 'sample-product'}`}
+                            slug={product.slug}
+                            sizes={product.sizes}
+                            color={product.color}
+                            styles={product.styles}
+                            onClick={() => setIsOpen(false)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {(!query ? [] : results).map((product: any, idx: number) => (
-                  <ProductCard 
-                    key={product.slug || product.title || idx}
-                    title={product.title}
-                    price={product.price}
-                    originalPrice={product.compareAtPrice || product.originalPrice}
-                    imageUrl={product.imageUrl}
-                    hoverImageUrl={product.hoverImageUrl}
-                    galleryUrls={product.galleryUrls}
-                    href={`/product/${product.slug || 'sample-product'}`}
-                    slug={product.slug}
-                    sizes={product.sizes}
-                    color={product.color}
-                    styles={product.styles}
-                  />
-                ))}
-              </div>
             </div>
           </div>
         </div>

@@ -72,10 +72,10 @@ function HomeLoader() {
       <div className="max-w-[1600px] mx-auto px-4 lg:px-8 py-16 w-full">
         <div className="h-6 w-64 bg-gray-200 mb-8 animate-pulse"></div>
         <div className="flex gap-4 overflow-hidden">
-           <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse"></div>
-           <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse"></div>
-           <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse"></div>
-           <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse hidden md:block"></div>
+          <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse"></div>
+          <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse"></div>
+          <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse"></div>
+          <div className="w-[75vw] sm:w-[350px] shrink-0 aspect-[3/4] bg-gray-100 animate-pulse hidden md:block"></div>
         </div>
       </div>
     </div>
@@ -142,7 +142,7 @@ async function HomeContent() {
           <SectionHeader title="Popular Categories" />
           <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 lg:gap-6 no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
             {categories.map((cat: any) => (
-              <Link href={`/category/${cat.slug || cat.seed}`} key={cat.title} className="group block shrink-0 snap-start w-[70vw] sm:w-[280px] lg:w-[320px]">
+              <Link href={`/category/${cat.slug || cat.seed}`} key={cat.title} className="group block shrink-0 snap-start w-[70vw] sm:w-[320px] lg:w-[360px]">
                 <div className="relative aspect-[3/4] mb-4 overflow-hidden bg-gray-100">
                   <Image
                     src={cat.imageUrl || `https://picsum.photos/seed/${cat.seed}/600/800`}
@@ -165,10 +165,14 @@ async function HomeContent() {
       <section className="bg-[#f8f8f8] py-16">
         <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
           <SectionHeader title="New Drops" viewAll viewAllLink="/collection/new-in" />
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 lg:gap-6 no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
             {newDrops.map((product: any, idx: number) => {
               const mapped = mapProduct(product);
-              return <ProductCard key={mapped.title || idx} {...mapped} />
+              return (
+                <div key={mapped.title || idx} className="shrink-0 snap-start w-[60vw] sm:w-[280px] lg:w-[300px]">
+                  <ProductCard {...mapped} />
+                </div>
+              );
             })}
           </div>
         </div>
@@ -217,10 +221,14 @@ async function HomeContent() {
           <section key={section.slug || sectionIdx} className={`py-16 ${sectionIdx % 2 === 0 ? 'bg-[#f8f8f8]' : 'bg-white'}`}>
             <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
               <SectionHeader title={section.title} viewAll viewAllLink={`/category/${section.slug}`} />
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 lg:gap-6 no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
                 {section.products.map((product: any, idx: number) => {
                   const mapped = mapProduct(product);
-                  return <ProductCard key={mapped.title || idx} {...mapped} />
+                  return (
+                    <div key={mapped.title || idx} className="shrink-0 snap-start w-[60vw] sm:w-[280px] lg:w-[300px]">
+                      <ProductCard {...mapped} />
+                    </div>
+                  );
                 })}
               </div>
             </div>
@@ -232,10 +240,14 @@ async function HomeContent() {
       <section className="bg-white py-16">
         <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
           <SectionHeader title="Bestsellers" viewAll viewAllLink="/collection/bestsellers" />
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 lg:gap-6 no-scrollbar pb-4 -mx-4 px-4 lg:mx-0 lg:px-0">
             {bestsellers.map((product: any, idx: number) => {
               const mapped = mapProduct(product);
-              return <ProductCard key={mapped.title || idx} {...mapped} />
+              return (
+                <div key={mapped.title || idx} className="shrink-0 snap-start w-[60vw] sm:w-[280px] lg:w-[300px]">
+                  <ProductCard {...mapped} />
+                </div>
+              );
             })}
           </div>
         </div>
@@ -274,7 +286,7 @@ async function HomeContent() {
             FOLLOW US ON INSTAGRAM
           </h2>
         </div>
-        
+
         <div className="max-w-[1920px] mx-auto px-4 md:px-8 xl:px-12">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 w-full gap-0">
             {Array.from({ length: displayInstaCount }).map((_, i) => {
@@ -288,13 +300,13 @@ async function HomeContent() {
               );
             })}
           </div>
-          
+
           <div className="mt-2 md:mt-3 text-center">
-            <a 
-              href="https://www.instagram.com/anupguptadesigner/" 
-              target="_blank" 
+            <a
+              href="https://www.instagram.com/anupguptadesigner/"
+              target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-[11px] md:text-xs font-medium text-gray-800 border-b border-gray-600 pb-[2px] hover:text-black hover:border-black transition-colors tracking-wide"
+              className="inline-block text-[13px] md:text-[13px] font-medium text-black border-b border-gray-600 pb-[1px] hover:text-black hover:border-black transition-colors tracking-wide"
             >
               @anupguptadesigner
             </a>

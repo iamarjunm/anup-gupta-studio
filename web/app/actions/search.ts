@@ -17,3 +17,14 @@ export async function searchProducts(query: string) {
     return [];
   }
 }
+export async function getBestSellers() {
+  try {
+    const { BESTSELLERS_QUERY } = await import('@/lib/queries');
+    const products = await client.fetch(BESTSELLERS_QUERY);
+    // Return only top 4
+    return products?.slice(0, 4) || [];
+  } catch (error) {
+    console.error('Failed to fetch bestsellers:', error);
+    return [];
+  }
+}

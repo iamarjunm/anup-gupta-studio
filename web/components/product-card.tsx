@@ -19,9 +19,10 @@ interface ProductCardProps {
   color?: string;
   styles?: { name: string; price: number }[];
   categorySlugs?: string[];
+  onClick?: () => void;
 }
 
-export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageUrl, galleryUrls, href, slug, sizes, color, styles, categorySlugs }: ProductCardProps) {
+export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageUrl, galleryUrls, href, slug, sizes, color, styles, categorySlugs, onClick }: ProductCardProps) {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
@@ -43,7 +44,7 @@ export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageU
   return (
     <>
       <div className="flex flex-col group">
-        <Link href={href} className="relative aspect-[3/4] overflow-hidden mb-3 bg-[#f5f5f5] block">
+        <Link href={href} className="relative aspect-[3/4] overflow-hidden mb-3 bg-[#f5f5f5] block" onClick={onClick}>
           <Image
             src={displayImage}
             alt={title}
@@ -120,7 +121,7 @@ export function ProductCard({ title, price, originalPrice, imageUrl, hoverImageU
              </button>
           </div>
         </Link>
-        <Link href={href} className="flex flex-col space-y-1">
+        <Link href={href} className="flex flex-col space-y-1" onClick={onClick}>
           <h3 className="text-[13px] text-gray-900 leading-snug line-clamp-2">
             {title}
           </h3>

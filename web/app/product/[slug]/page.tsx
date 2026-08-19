@@ -11,6 +11,7 @@ import { RichText } from '@/components/rich-text';
 import { ProductGallery } from '@/components/product-gallery';
 import { SizeChartModal } from '@/components/size-chart-modal';
 import { ProductCard } from '@/components/product-card';
+import { RecentViewTracker } from '@/components/recent-view-tracker';
 import { Suspense } from 'react';
 
 export const revalidate = 60; // Revalidate every 60 seconds
@@ -117,6 +118,7 @@ async function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ 
 
   return (
     <>
+      <RecentViewTracker product={product} />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 xl:gap-20 items-start">
         
         {/* Left Side - Images */}

@@ -12,7 +12,7 @@ export const SEARCH_PRODUCTS_QUERY = `*[_type == "product" && (title match $quer
   "categorySlugs": categories[]->slug.current
 }`;
 
-export const NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true][0...5] {
+export const NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true][0...8] {
   title,
   price,
   compareAtPrice,
@@ -26,7 +26,7 @@ export const NEW_ARRIVALS_QUERY = `*[_type == "product" && newArrival == true][0
   "categorySlugs": categories[]->slug.current
 }`;
 
-export const BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true][0...5] {
+export const BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true][0...8] {
   title,
   price,
   compareAtPrice,
@@ -43,7 +43,7 @@ export const BESTSELLERS_QUERY = `*[_type == "product" && bestseller == true][0.
 export const FEATURED_SECTIONS_QUERY = `*[(_type == "category" || _type == "subcategory") && (featuredOnHome == true || displayOnHome == true)] | order(order asc) {
   title,
   "slug": slug.current,
-  "products": *[_type == "product" && references(^._id)][0...5] {
+  "products": *[_type == "product" && references(^._id)][0...8] {
     title,
     price,
     compareAtPrice,
