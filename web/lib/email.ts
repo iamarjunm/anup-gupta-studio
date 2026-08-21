@@ -94,8 +94,8 @@ export async function sendOrderConfirmationEmail(orderData: any) {
           </tr>
           ${orderData.discountAmount ? `
           <tr>
-            <td colspan="2" style="text-align: right; padding: 12px; color: #666666;">Discount:</td>
-            <td style="text-align: right; padding: 12px; color: #dc2626;">-₹${orderData.discountAmount.toLocaleString('en-IN')}</td>
+            <td colspan="2" style="text-align: right; padding: 12px; color: #666666;">Discount \${orderData.discountCode ? '(' + orderData.discountCode + ')' : ''}:</td>
+            <td style="text-align: right; padding: 12px; color: #dc2626;">-₹\${orderData.discountAmount.toLocaleString('en-IN')}</td>
           </tr>
           ` : ''}
           <tr>
@@ -178,7 +178,7 @@ export async function sendOrderStatusUpdateEmail(orderData: any, newStatus: stri
       </div>
 
       ${orderData.items && orderData.items.length > 0 ? `
-      <h3 style="text-transform: uppercase; font-size: 14px; letter-spacing: 1px; border-bottom: 2px solid #111111; padding-bottom: 10px;">Order Items</h3>
+      <h3 style="text-transform: uppercase; font-size: 14px; letter-spacing: 1px; border-bottom: 2px solid #111111; padding-bottom: 10px;">Order Summary</h3>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
         <thead>
           <tr>
@@ -190,6 +190,26 @@ export async function sendOrderStatusUpdateEmail(orderData: any, newStatus: stri
         <tbody>
           ${itemsHtml}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" style="text-align: right; padding: 12px; color: #666666;">Subtotal:</td>
+            <td style="text-align: right; padding: 12px;">₹${orderData.subtotal?.toLocaleString('en-IN') || orderData.total?.toLocaleString('en-IN')}</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="text-align: right; padding: 12px; color: #666666;">Shipping:</td>
+            <td style="text-align: right; padding: 12px;">${orderData.shippingCost ? '₹' + orderData.shippingCost.toLocaleString('en-IN') : 'Free'}</td>
+          </tr>
+          ${orderData.discountAmount ? `
+          <tr>
+            <td colspan="2" style="text-align: right; padding: 12px; color: #666666;">Discount \${orderData.discountCode ? '(' + orderData.discountCode + ')' : ''}:</td>
+            <td style="text-align: right; padding: 12px; color: #dc2626;">-₹\${orderData.discountAmount.toLocaleString('en-IN')}</td>
+          </tr>
+          ` : ''}
+          <tr>
+            <td colspan="2" style="text-align: right; padding: 12px; font-weight: bold; color: #111111; font-size: 16px;">Total:</td>
+            <td style="text-align: right; padding: 12px; font-weight: bold; color: #111111; font-size: 16px;">₹${orderData.total?.toLocaleString('en-IN')}</td>
+          </tr>
+        </tfoot>
       </table>
       ` : ''}
 

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { after } from 'next/server';
 import crypto from 'crypto';
 import { writeClient, client } from '@/lib/sanity';
 import { sendOrderConfirmationEmail } from '@/lib/email';
@@ -102,6 +101,7 @@ export async function POST(request: Request) {
       shippingAddress,
       subtotal,
       shippingCost,
+      discountCode: discountCode || '',
       discountAmount: calculatedDiscountAmount,
       total
     };
@@ -124,10 +124,8 @@ export async function POST(request: Request) {
 
     await Promise.all(operations);
 
-    // Send confirmation email in background to avoid blocking the UI response
-    after(() => {
-      sendOrderConfirmationEmail(orderDataForEmail).catch(console.error);
-    });
+    // Send confirmation email
+    await sendOrderConfirmationEmail(orderDataForEmail).catch(console.error);
 
     return NextResponse.json({ success: true, message: 'Payment verified successfully', orderNumber });
   } catch (error: any) {

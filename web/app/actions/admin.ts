@@ -2,7 +2,7 @@
 
 import { client, writeClient } from '@/lib/sanity';
 import { revalidatePath } from 'next/cache';
-import { after } from 'next/server';
+
 import { sendOrderStatusUpdateEmail } from '@/lib/email';
 
 export async function getAdminStats() {
@@ -92,10 +92,8 @@ export async function updateOrderStatus(orderId: string, newStatus: string, trac
     revalidatePath('/admin', 'layout');
     revalidatePath('/profile');
     
-    // Send email notification in the background to prevent blocking the UI
-    after(() => {
-      sendOrderStatusUpdateEmail(updatedOrder, newStatus).catch(console.error);
-    });
+    // Send email notification
+    await sendOrderStatusUpdateEmail(updatedOrder, newStatus).catch(console.error);
 
     return { success: true, order: updatedOrder };
   } catch (error: any) {

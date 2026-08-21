@@ -202,7 +202,6 @@ export default function CheckoutPage() {
            });
            const verifyData = await verifyRes.json();
            if (verifyRes.ok) {
-             clearCart();
              router.push(`/checkout/success?orderId=${verifyData.orderNumber}`);
            } else {
              toast('Order creation failed: ' + verifyData.error, 'error');
@@ -249,7 +248,6 @@ export default function CheckoutPage() {
             const verifyData = await verifyRes.json();
 
             if (verifyRes.ok) {
-              clearCart();
               router.push(`/checkout/success?orderId=${verifyData.orderNumber}`);
             } else {
               toast('Payment verification failed: ' + verifyData.error, 'error');
@@ -267,6 +265,11 @@ export default function CheckoutPage() {
         },
         theme: {
           color: '#000000'
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+          }
         }
       };
 
